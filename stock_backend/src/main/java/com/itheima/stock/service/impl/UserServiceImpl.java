@@ -1,0 +1,161 @@
+package com.itheima.stock.service.impl;
+
+import cn.hutool.captcha.CaptchaUtil;
+import cn.hutool.captcha.LineCaptcha;
+import cn.hutool.captcha.generator.CodeGenerator;
+import com.itheima.stock.constant.StockConstant;
+import com.itheima.stock.mapper.SysUserMapper;
+import com.itheima.stock.pojo.entity.SysUser;
+import com.itheima.stock.service.UserService;
+import com.itheima.stock.utils.IdWorker;
+import com.itheima.stock.vo.req.LoginReqVo;
+import com.itheima.stock.vo.resp.LoginRespVo;
+import com.itheima.stock.vo.resp.R;
+import com.itheima.stock.vo.resp.ResponseCode;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * @ClassName: UserServiceImpl
+ * @Description: TODO
+ * @Author: mianbaoren
+ * @Date: 2024/8/27 14:24
+ */
+/**
+ * @author by itheima
+ * @Date 2022/6/29
+ * @Description 定义user服务实现
+ */
+
+@Service("userService")
+@Slf4j
+public class UserServiceImpl implements UserService {
+
+    @Autowired
+    private SysUserMapper sysUserMapper;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private IdWorker idWorker;
+    @Autowired
+    private RedisTemplate redisTemplate;
+    /**
+     * 根据用户名称查询用户信息
+     * @param userName 用户名称
+     * @return
+     */
+    @Override
+    public SysUser findByUserName(String userName) {
+        SysUser user=sysUserMapper.findByUserName(userName);
+        return user;
+    }
+
+    /**
+     * 用户登录
+     * @param vo
+     * @return
+     */
+    @Override
+    public R<LoginRespVo> login(LoginReqVo vo) {
+       //1.判断是否合法
+        if(vo == null || StringUtils.isBlank(vo.getUsername())|| StringUtils.isBlank(vo.getPassword())){
+            return R.error(ResponseCode.DATA_ERROR);
+        }
+        //判断输入的验证码是否存在
+        if(StringUtils.isBlank(vo.getCode()) || StringUtils.isBlank(vo.getSessionId())){
+           return R.error(ResponseCode.CHECK_CODE_ERROR);
+        }
+        //判断redis中保存的验证码与输入的验证码是否相同（比较时忽略大小写）
+        String redisCode = (String) redisTemplate.opsForValue().get(StockConstant.CHECK_PREFIX + vo.getSessionId());
+        if (StringUtils.isBlank(redisCode)) {
+            //验证码过期
+            return R.error(ResponseCode.CHECK_CODE_TIMEOUT);
+        }
+        //忽略大小写比对
+        if (!redisCode.equalsIgnoreCase(vo.getCode())) {
+            return R.error(ResponseCode.CHECK_CODE_ERROR);
+        }
+
+        //2.根据用户名去数据库查询用户信息，获取密码的密文
+        SysUser dbUser = sysUserMapper.findByUserName(vo.getUsername());
+        if (dbUser == null) {
+            //用户不存在
+            return R.error(ResponseCode.ACCOUNT_NOT_EXISTS);
+        }
+
+        //3.调用密码匹配器，匹配密码
+        if (!passwordEncoder.matches(vo.getPassword(),dbUser.getPassword())) {
+            //密码不匹配
+            return R.error(ResponseCode.USERNAME_OR_PASSWORD_ERROR);
+        }
+
+       //4.响应
+        LoginRespVo reqsVo = new LoginRespVo();
+
+//        reqsVo.setUsername(dbUser.getUsername());
+//        reqsVo.setNickName(dbUser.getNickName());
+//        reqsVo.setPhone(dbUser.getPhone());
+//        reqsVo.setId(dbUser.getId());
+        //发现LoginRespVo和SysUser对象属性名称和类型一致
+        BeanUtils.copyProperties(dbUser,reqsVo);
+        return R.ok(reqsVo);
+    }
+
+    @Override
+    public R<Map> getCaptchaCode() {
+
+        //1.生成图片验证码
+        /*
+        参数1：图片的宽度
+        参数2：图片的高度
+        参数3：图片中包含验证的长度
+        参数4：图中横线的数量
+         */
+        LineCaptcha captcha = CaptchaUtil.createLineCaptcha(250, 40, 4, 5);
+        //设置背景颜色清灰
+        captcha.setBackground(Color.lightGray);
+        //自定义生成校验码的规则
+//        captcha.setGenerator(new CodeGenerator() {
+//            @Override
+//            public String generate() {
+//                //自定义校验码生成的逻辑
+//                return null;
+//            }
+//
+//            @Override
+//            public boolean verify(String s, String s1) {
+//                return false;
+//            }
+//        });
+        //获取校验码
+        String checkCode = captcha.getCode();
+        //1.获取经过base64编码处理过的图片数据
+        String imageData = captcha.getImageBase64();
+        //2.生成sessionId,转换成字符串，防止序列码精度丢失
+        String sessionId = String.valueOf(idWorker.nextId());
+        log.info("当前生成的图片校验码：{}.会话id：{}",checkCode,sessionId);
+        //3.将sessionId作为key，校验码作为value保存在redis中
+        /*
+            使用redis模拟session的行为，通过过期时间设置
+         */
+        redisTemplate.opsForValue().set(StockConstant.CHECK_PREFIX+sessionId,checkCode,1, TimeUnit.MINUTES);
+      //4.组装数据给前端
+        HashMap<String,String> data = new HashMap<>();
+        data.put("sessionId",sessionId);
+        data.put("imageData",imageData);
+    //5.响应数据
+        return R.ok(data);
+
+    }
+}
