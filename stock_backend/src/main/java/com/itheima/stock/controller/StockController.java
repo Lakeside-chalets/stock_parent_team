@@ -152,20 +152,24 @@ public class StockController {
      * 单个个股日K线数据查询 ，可以根据时间区间查询数日的K线数据
      * @param stockCode 股票编码
      */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", dataType = "string", name = "code", value = "股票编码", required = true)
+    })
     @ApiOperation(value = "单个个股日K线数据查询", notes = "单个个股日K线数据查询 ，可以根据时间区间查询数日的K线数据", httpMethod = "GET")
     @GetMapping("/stock/screen/dkline")
     public R<List<Stock4EvrDayDomain>> getStockByDayKlin(@RequestParam(value = "code" ,required = true) String stockCode){
         return stockService.getStockByDayKlin(stockCode);
     }
 
-//    /**
-//     * 单个个股周K线数据查询 ，可以根据时间区间查询数日的K线数据
-//     * @param stockCode 股票编码
-//     */
-//    @ApiOperation(value = "单个个股周K线数据查询", notes = "单个个股日K线数据查询 ，可以根据时间区间查询数日的K线数据", httpMethod = "GET")
-//    @GetMapping("/stock/screen/dkline")
-//    public R<List<Stock4EvrDayDomain>> getStockByWeekKlin(@RequestParam(value = "code" ,required = true) String stockCode){
-//        return stockService.getStockByDayKlin(stockCode);
-//    }
+
+    /**
+     * 获取国外大盘的最新数据
+     * @return
+     */
+    @ApiOperation(value = "获取国外大盘的最新数据", notes = "获取国外大盘的最新数据", httpMethod = "GET")
+    @GetMapping("/external/index")
+    public R<List<OuterMarketDomain>>  getOutMarketInfo(){
+        return stockService.getOutMarketInfo();
+    }
 
 }

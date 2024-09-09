@@ -26,6 +26,20 @@
         from stock_outer_market_index_info
         where  id = #{id,jdbcType=BIGINT} 
     </select>
+    <select id="getOutMarketInfo" resultType="com.itheima.stock.pojo.domain.OuterMarketDomain">
+        select date_format(cur_time, '%Y%m%d') as curTime,
+               market_name                     as name,
+               cur_point                       as curPoint,
+               updown                          as upDown,
+               rose                            as rose
+        from stock_outer_market_index_info
+        where cur_time = #{curTime}
+            and market_code in
+        <foreach collection="outerMcodes" item="outcode" open="(" separator="," close=")">
+            #{outcode}
+        </foreach>
+        order by cur_time, cur_point desc limit 4
+    </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from stock_outer_market_index_info

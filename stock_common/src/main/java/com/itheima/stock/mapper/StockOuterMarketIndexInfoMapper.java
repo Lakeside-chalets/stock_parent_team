@@ -1,6 +1,11 @@
 package com.itheima.stock.mapper;
 
+import com.itheima.stock.pojo.domain.OuterMarketDomain;
 import com.itheima.stock.pojo.entity.StockOuterMarketIndexInfo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Date;
+import java.util.List;
 
 /**
 * @author mianbaoren
@@ -21,5 +26,14 @@ public interface StockOuterMarketIndexInfoMapper {
     int updateByPrimaryKeySelective(StockOuterMarketIndexInfo record);
 
     int updateByPrimaryKey(StockOuterMarketIndexInfo record);
+
+    /**
+     *获取国外大盘的最新数据，(按降序显示前四条)
+     * @param curDate 当前时间
+     * @param outerMcodes 外盘编码
+     * @return
+     */
+    List<OuterMarketDomain> getOutMarketInfo(@Param("curTime") Date curDate, @Param("outerMcodes") List<String> outerMcodes);
+
 
 }

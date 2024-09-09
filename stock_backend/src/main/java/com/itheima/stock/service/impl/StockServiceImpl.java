@@ -7,6 +7,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.itheima.stock.mapper.StockBlockRtInfoMapper;
 import com.itheima.stock.mapper.StockMarketIndexInfoMapper;
+import com.itheima.stock.mapper.StockOuterMarketIndexInfoMapper;
 import com.itheima.stock.mapper.StockRtInfoMapper;
 import com.itheima.stock.pojo.domain.*;
 import com.itheima.stock.pojo.vo.StockInfoConfig;
@@ -46,6 +47,8 @@ public class StockServiceImpl implements StockService {
     private StockRtInfoMapper stockRtInfoMapper;
     @Autowired
     private Cache<String,Object> caffeineCache;
+    @Autowired
+    private StockOuterMarketIndexInfoMapper stockOuterMarketIndexInfoMapper;
     /**
      * 获取国内大盘最新的数据
      * @return
@@ -61,7 +64,7 @@ public class StockServiceImpl implements StockService {
 //        Date curDate = curDateTime.toDate();
             DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
             //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
-            dateTime=DateTime.parse("2021-12-28 09:32:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+            dateTime=DateTime.parse("2022-07-07 14:52:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
             Date curDate = dateTime.toDate();
             //2.获取大盘编码集合
             List<String> mCodes = stockInfoConfig.getInner();
@@ -324,6 +327,31 @@ public class StockServiceImpl implements StockService {
         List<Stock4EvrDayDomain> data = stockRtInfoMapper.getStockByDayKlin(stockCode, closeDates);
         //响应数据
         return R.ok(data);
+    }
+
+    /**
+     * 获取国外大盘的最新数据，(按降序显示前四条)
+     * @return
+     */
+    @Override
+    public R<List<OuterMarketDomain>> getOutMarketInfo() {
+        //默认从本地缓存加载数据，如果不存在则从数据库加载并同步到本地缓存
+        //在开盘周期内，本地缓存默认有效期为1分钟
+        R<List<OuterMarketDomain>> result = (R<List<OuterMarketDomain>>) caffeineCache.get("outerMarketKey", key -> {
+            //1.获取最新时间交易时间点
+            DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+            //TODO: mock时间
+            dateTime = DateTime.parse("2022-01-01 10:57:00",DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+            Date curDate = dateTime.toDate();
+//        //2.获取国内大盘集合
+            List<String> outerMcodes = stockInfoConfig.getOuter();
+            //3.调用mapper查询
+            List<OuterMarketDomain> data = stockOuterMarketIndexInfoMapper.getOutMarketInfo(curDate,outerMcodes);
+            //4.封装数据并响应
+            return R.ok(data);
+        });
+        return result;
+
     }
 
 

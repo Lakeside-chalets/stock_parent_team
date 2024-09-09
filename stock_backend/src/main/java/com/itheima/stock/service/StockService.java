@@ -75,4 +75,10 @@ public interface StockService {
      * @param stockCode 股票编码
      */
     R<List<Stock4EvrDayDomain>> getStockByDayKlin(@Param("stockCode") String stockCode);
+
+    /**
+     * 获取国外大盘的最新数据，按降序显示前四条
+     * @return
+     */
+    R<List<OuterMarketDomain>> getOutMarketInfo();
 }

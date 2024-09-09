@@ -39,9 +39,11 @@ public class StockInfoConfig {
     /**
      * 大盘参数获取url
      */
+    @ApiModelProperty(value = "大盘参数获取url", position = 4)
     private String marketUrl;
     /**
      * 板块参数获取url
      */
+    @ApiModelProperty(value = "板块参数获取url", position = 5)
     private String blockUrl;
 }

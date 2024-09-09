@@ -79,7 +79,7 @@ public class DateTimeUtil {
      * @return
      */
     public static DateTime getCloseDate(DateTime dateTime){
-       return dateTime.withHourOfDay(14).withMinuteOfHour(58).withSecondOfMinute(0).withMillisOfSecond(0);
+       return dateTime.withHourOfDay(15).withMinuteOfHour(00).withSecondOfMinute(0).withMillisOfSecond(0);
     }
 
     /**
@@ -113,7 +113,7 @@ public class DateTimeUtil {
             if (target.isBefore(getOpenDate(target))) {
                 target=getCloseDate(getPreviousTradingDay(target));
             }else if (isMarketOffTime(target)){
-                target=target.withHourOfDay(11).withMinuteOfHour(28).withSecondOfMinute(0).withMillisOfSecond(0);
+                target=target.withHourOfDay(11).withMinuteOfHour(30).withSecondOfMinute(0).withMillisOfSecond(0);
             }else if (target.isAfter(getCloseDate(target))){
                 //当前日期收盘后
                 target=getCloseDate(target);
@@ -132,7 +132,7 @@ public class DateTimeUtil {
      */
     public static boolean isMarketOffTime(DateTime target){
         //上午休盘开始时间
-        DateTime start = target.withHourOfDay(11).withMinuteOfHour(28).withSecondOfMinute(0).withMillisOfSecond(0);
+        DateTime start = target.withHourOfDay(11).withMinuteOfHour(30).withSecondOfMinute(0).withMillisOfSecond(0);
         //下午开盘时间
         DateTime end = target.withHourOfDay(13).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0);
         if (target.isAfter(start) && target.isBefore(end)) {
