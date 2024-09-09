@@ -25,6 +25,9 @@ import java.util.Map;
 @RequestMapping("/api")
 @Api(tags = "用户相关接口处理器")
 public class UserController {
+    /**
+     * 注入用户服务bean
+     */
     @Autowired
     private UserService userService;
 
