@@ -172,4 +172,19 @@ public class StockController {
         return stockService.getOutMarketInfo();
     }
 
+    /**
+     * 根据个股编码模糊查询股票信息
+     * @param searchStr
+     * @return
+     */
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", dataType = "string", name = "searchStr", value = "", required = true)
+    })
+    @ApiOperation(value = "根据个股编码模糊查询股票信息", notes = "根据个股编码模糊查询股票信息", httpMethod = "GET")
+    @GetMapping("/stock/search")
+    public R<List<Map<String,Object>>> FuzzySearch(@RequestParam(value = "searchStr") String searchStr){
+        return stockService.FuzzySearch(searchStr);
+    }
+
 }

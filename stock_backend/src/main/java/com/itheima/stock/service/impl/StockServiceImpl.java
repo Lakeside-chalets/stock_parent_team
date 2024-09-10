@@ -17,6 +17,7 @@ import com.itheima.stock.vo.resp.PageResult;
 import com.itheima.stock.vo.resp.R;
 import com.itheima.stock.vo.resp.ResponseCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.itheima.stock.vo.resp.ResponseCode.NO_RESPONSE_DATA;
 
 /**
  * @ClassName: StockServiceImpl
@@ -352,6 +355,25 @@ public class StockServiceImpl implements StockService {
         });
         return result;
 
+    }
+
+    /**
+     * 根据个股编码模糊查询股票信息
+     * @param searchStr
+     * @return
+     */
+    @Override
+    public R<List<Map<String, Object>>> FuzzySearch(String searchStr) {
+        //1.首先进行检验，参数为空的话返回错误
+        if (StringUtils.isBlank(searchStr)) {
+            return R.error(NO_RESPONSE_DATA);
+        }
+        //2.对参数进行模糊处理
+        String searchStrFuzzy = "%" + searchStr + "%";
+        //3.根据股票代进行模糊查询
+       List<Map<String,Object>> data = stockRtInfoMapper.getInfobyFuzzySearch(searchStrFuzzy);
+
+        return R.ok(data);
     }
 
 

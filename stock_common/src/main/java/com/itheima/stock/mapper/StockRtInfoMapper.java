@@ -92,4 +92,10 @@ public interface StockRtInfoMapper {
      */
     int insertBatch(@Param("list") List<StockRtInfo> list);
 
+    /**
+     * 根据个股编码模糊查询股票信息
+     * @param searchStrFuzzy 模糊查询参数
+     * @return
+     */
+    List<Map<String, Object>> getInfobyFuzzySearch(@Param("searchStrFuzzy") String searchStrFuzzy);
 }
