@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.itheima.stock.mapper.StockBlockRtInfoMapper;
-import com.itheima.stock.mapper.StockMarketIndexInfoMapper;
-import com.itheima.stock.mapper.StockOuterMarketIndexInfoMapper;
-import com.itheima.stock.mapper.StockRtInfoMapper;
+import com.itheima.stock.mapper.*;
 import com.itheima.stock.pojo.domain.*;
 import com.itheima.stock.pojo.vo.StockInfoConfig;
 import com.itheima.stock.service.StockService;
@@ -22,6 +19,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -52,6 +50,8 @@ public class StockServiceImpl implements StockService {
     private Cache<String,Object> caffeineCache;
     @Autowired
     private StockOuterMarketIndexInfoMapper stockOuterMarketIndexInfoMapper;
+    @Autowired
+    private StockBusinessMapper stockBusinessMapper;
     /**
      * 获取国内大盘最新的数据
      * @return
@@ -318,7 +318,7 @@ public class StockServiceImpl implements StockService {
         endDateTime = DateTime.parse("2022-02-19 09:32:00" ,DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
         Date endDate = endDateTime.toDate();
         //起始时间
-        DateTime startDateTime = endDateTime.minusMinutes(1);
+        DateTime startDateTime = endDateTime.minusDays(10);
         //TODO:moctime
         startDateTime = DateTime.parse("2021-12-19 09:32:00" ,DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
         Date startDate = startDateTime.toDate();
@@ -328,6 +328,30 @@ public class StockServiceImpl implements StockService {
         List<Date> closeDates = stockRtInfoMapper.getCloseDates(stockCode,startDate,endDate);
         //根据收盘时间获取日K数据
         List<Stock4EvrDayDomain> data = stockRtInfoMapper.getStockByDayKlin(stockCode, closeDates);
+        //响应数据
+        return R.ok(data);
+    }
+
+    /**
+     * 单个个股周K线数据查询
+     * @param code 股票编码
+     */
+    @Override
+    public R<List<Map<String, Object>>> getStockByWeeKline(String code) {
+        //获取统计周k线的时间范围
+            //获取股票的截止时间
+        DateTime EndDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+        EndDateTime = DateTime.parse("2022-01-31 10:12:00",DateTimeFormat.forPattern("yyyy-MM-dd HH:ss:mm"));
+        Date endDate = EndDateTime.toDate();
+            //获取起始时间
+        DateTime openDateTime = EndDateTime.minusDays(4);
+        openDateTime = DateTime.parse("2021-12-31 10:12:00",DateTimeFormat.forPattern("yyyy-MM-dd HH:ss:mm"));
+        Date openDate = openDateTime.toDate();
+        //调用mapper查询
+        //方案2：先获取指定日期范围内的收盘时间点集合
+        List<Date> closeDates = stockRtInfoMapper.getCloseDates(code,openDate,endDate);
+        ////根据收盘时间获取周K数据
+        List<Map<String,Object>> data = stockRtInfoMapper.getStockByWeekline(code, closeDates);
         //响应数据
         return R.ok(data);
     }
@@ -373,6 +397,60 @@ public class StockServiceImpl implements StockService {
         //3.根据股票代进行模糊查询
        List<Map<String,Object>> data = stockRtInfoMapper.getInfobyFuzzySearch(searchStrFuzzy);
 
+        return R.ok(data);
+    }
+
+    /**
+     * 个股主营业务查询股票信息
+     * @param code 股票编码
+     * @return
+     */
+    @Override
+    public R<Map<String,Object>> getBusinessInfoByCode(String code) {
+        //1.判断编码是否为空，为空则返回异常信息
+        if (StringUtils.isBlank(code)) {
+            return R.error(NO_RESPONSE_DATA);
+        }
+        //2.调用mapper查询
+       Map<String,Object> data = stockBusinessMapper.getBusinessInfoByCode(code);
+        return R.ok(data);
+    }
+
+    /**
+     * 获取最新的行情数据到面板上
+     * @param code 股票编码
+     * @return
+     */
+    @Override
+    public R<Map<String, Object>> stockScreenTimeSharingInfo(String code) {
+// 获取最新股票有效交易日
+        DateTime lastDate4Stock = DateTimeUtil.getLastDate4Stock(DateTime.now());
+        DateTime openDate = DateTimeUtil.getOpenDate(lastDate4Stock);
+        Date endTime = lastDate4Stock.toDate();
+        Date startTime = openDate.toDate();
+        // TODO moke 测试数据
+        startTime = DateTime.parse("2021-12-30 09:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        endTime = DateTime.parse("2021-12-30 15:00:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        //调用mapper查询
+        //方案2：先获取指定日期范围内的收盘时间点集合
+     Map<String,Object> data  = stockRtInfoMapper.getstockScreenTimeSharingInfo(code,startTime,endTime);
+        //响应数据
+        return R.ok(data);
+    }
+
+    /**
+     * 个股交易流水行情数据显示，按照交易时间降序取前10
+     * @param code
+     * @return
+     */
+    @Override
+    public R<List<Map<String, Object>>> getstockTradingOnScreen(String code) {
+        //1.判断编码是否为空，为空则返回异常信息
+        if (StringUtils.isBlank(code)) {
+            return R.error(NO_RESPONSE_DATA);
+        }
+        //2.调用mapper查询
+        List<Map<String,Object>> data = stockRtInfoMapper.getstockTradingOnScreen(code);
         return R.ok(data);
     }
 

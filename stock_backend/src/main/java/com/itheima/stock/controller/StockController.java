@@ -160,6 +160,19 @@ public class StockController {
     public R<List<Stock4EvrDayDomain>> getStockByDayKlin(@RequestParam(value = "code" ,required = true) String stockCode){
         return stockService.getStockByDayKlin(stockCode);
     }
+    /**
+     *单个个股周K线数据查询
+     * @param code
+     * @return
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", dataType = "string", name = "code", value = "", required = true)
+    })
+    @ApiOperation(value = "单个个股周K线数据查询", notes = "单个个股周K线数据查询", httpMethod = "GET")
+    @GetMapping("/stock/screen/weekkline")
+    public  R<List<Map<String,Object>>> getStockByWeeKline(@RequestParam(value = "code" ,required = true) String code){
+        return stockService.getStockByWeeKline(code);
+    }
 
 
     /**
@@ -185,6 +198,39 @@ public class StockController {
     @GetMapping("/stock/search")
     public R<List<Map<String,Object>>> FuzzySearch(@RequestParam(value = "searchStr") String searchStr){
         return stockService.FuzzySearch(searchStr);
+    }
+
+    /**
+     * 个股主营业务查询股票信息
+     * @param code 股票编码
+     * @return
+     */
+    @ApiOperation(value = "个股主营业务查询股票信息", notes = "个股主营业务查询股票信息", httpMethod = "GET")
+    @GetMapping("/stock/describe")
+    public R<Map<String,Object>> getBusinessInfoByCode(String code){
+        return stockService.getBusinessInfoByCode(code);
+    }
+
+    /**
+     * 获取最新的行情数据到面板上
+     * @param code 股票编码
+     * @return
+     */
+    @ApiOperation(value = "获取最新的行情数据到面板上", notes = "获取最新的行情数据到面板上", httpMethod = "GET")
+    @GetMapping("/stock/screen/second/detail")
+    public R<Map<String,Object>> stockScreenTimeSharingInfo(String code){
+        return stockService.stockScreenTimeSharingInfo(code);
+    }
+
+    /**
+     * 个股交易流水行情数据显示，按照交易时间降序取前10
+     * @param code
+     * @return
+     */
+    @ApiOperation(value = "个股交易流水行情数据显示，按照交易时间降序取前10", notes = "个股交易流水行情数据显示，按照交易时间降序取前10", httpMethod = "GET")
+    @GetMapping("/stock/screen/second")
+    public R<List<Map<String,Object>>> getstockTradingOnScreen(String code){
+        return stockService.getstockTradingOnScreen(code);
     }
 
 }

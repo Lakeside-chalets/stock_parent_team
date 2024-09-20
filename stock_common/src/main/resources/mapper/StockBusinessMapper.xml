@@ -27,6 +27,17 @@
     <select id="getAllStockCode" resultType="string">
         select stock_code from stock_business
     </select>
+    <select id="getBusinessInfoByCode" resultType="map">
+        select
+            stock_code as code,
+            block_name as trade,
+            business as business,
+            stock_name as name
+        from
+            stock_business
+        where stock_code = #{code} ;
+
+    </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from stock_business

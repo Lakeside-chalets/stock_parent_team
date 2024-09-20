@@ -35,5 +35,10 @@ public interface StockOuterMarketIndexInfoMapper {
      */
     List<OuterMarketDomain> getOutMarketInfo(@Param("curTime") Date curDate, @Param("outerMcodes") List<String> outerMcodes);
 
-
+    /**
+     * 批量插入国外大盘数据
+     * @param entities
+     * @return
+     */
+    int insertBatch(@Param("infos") List<StockOuterMarketIndexInfo> entities);
 }

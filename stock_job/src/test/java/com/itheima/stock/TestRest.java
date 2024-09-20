@@ -23,9 +23,10 @@ public class TestRest {
     @Test
     public void testGetMarketInfo() throws InterruptedException {
 //        stockTimerTaskService.getInnerMarketInfo();
-        stockTimerTaskService.getStockRtIndex();
+//        stockTimerTaskService.getStockRtIndex();
         //目的：让主线程休眠，等待子线程执行完任务
-        Thread.sleep(5000);
+        stockTimerTaskService.getStockOuterMarketInfo();
+//        Thread.sleep(5000);
 //        stockTimerTaskService.getStockBlockRtIndex();
     }
 

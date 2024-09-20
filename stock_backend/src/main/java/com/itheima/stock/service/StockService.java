@@ -77,6 +77,11 @@ public interface StockService {
     R<List<Stock4EvrDayDomain>> getStockByDayKlin(@Param("stockCode") String stockCode);
 
     /**
+     * 单个个股周K线数据查询
+     * @param code 股票编码
+     */
+    R<List<Map<String, Object>>> getStockByWeeKline(@Param("code") String code);
+    /**
      * 获取国外大盘的最新数据，按降序显示前四条
      * @return
      */
@@ -88,4 +93,27 @@ public interface StockService {
      * @return
      */
     R<List<Map<String, Object>>> FuzzySearch(@Param("sebyCode") String searchStr);
+
+
+
+    /**
+     * 个股主营业务查询股票信息
+     * @param code 股票编码
+     * @return
+     */
+    R<Map<String, Object>> getBusinessInfoByCode(@Param("code") String code);
+
+    /**
+     * 获取最新的行情数据到面板上
+     * @param code 股票编码
+     * @return
+     */
+    R<Map<String, Object>> stockScreenTimeSharingInfo(@Param("code") String code);
+
+    /**
+     * 个股交易流水行情数据显示，按照交易时间降序取前10
+     * @param code
+     * @return
+     */
+    R<List<Map<String, Object>>> getstockTradingOnScreen(@Param("code") String code);
 }

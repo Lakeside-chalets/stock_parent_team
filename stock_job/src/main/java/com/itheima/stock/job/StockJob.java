@@ -51,4 +51,12 @@ public class StockJob {
     public void getStockBlockRtIndex(){
         stockTimerTaskService.getStockBlockRtIndex();
     }
+
+    /**
+     * 定时采集国外大盘数据
+     */
+    @XxlJob("getStockOuterMarketInfo")
+    public void getStockOuterMarketInfo(){
+        stockTimerTaskService.getStockOuterMarketInfo();
+    }
 }

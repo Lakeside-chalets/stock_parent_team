@@ -1,8 +1,10 @@
 package com.itheima.stock.mapper;
 
 import com.itheima.stock.pojo.entity.StockBusiness;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
 * @author mianbaoren
@@ -29,4 +31,11 @@ public interface StockBusinessMapper {
      * @return
      */
     List<String> getAllStockCode();
+
+    /**
+     * 个股主营业务查询股票信息
+     * @param code 股票编码
+     * @return
+     */
+    Map<String, Object> getBusinessInfoByCode(@Param("code") String code);
 }

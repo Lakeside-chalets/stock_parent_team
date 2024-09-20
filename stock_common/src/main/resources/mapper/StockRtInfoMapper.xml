@@ -158,6 +158,55 @@
         from stock_rt_info
         where stock_code like #{searchStrFuzzy}
     </select>
+    <select id="getStockByWeekline" resultType="java.util.Map">
+        select
+            avg(cur_price) as avgPrice,
+            min_price as minPrice,
+            open_price as openPrice,
+            max_price as maxPrice,
+            cur_price as closePrice,
+        date_format(max(cur_time), '%Y%m%d') as mxTime,
+            stock_code as stockCode
+        from
+            stock_rt_info
+        where stock_code=#{code} and cur_time in
+        <foreach collection="dates" item="date" open="(" close=")" separator=",">
+            #{date}
+        </foreach>
+        group by min_price,open_price,max_price,cur_price,stock_code
+    </select>
+    <select id="getstockScreenTimeSharingInfo" resultType="java.util.Map">
+        select
+            sri.trade_amount as tradeAmt,
+            sri.pre_close_price as preClosePrice,
+            sri.min_price as lowPrice,
+            sri.max_price as highPrice,
+            sri.open_price as openPrice,
+            sri.trade_volume as tradeVol,
+            sri.cur_price as tradePrice,
+            date_format(sri.cur_time,"%Y-%m-%d %H:%i") as curDate
+        from stock_rt_info as sri
+        where cur_time in (
+            select
+                max(sri2.cur_time)
+            from stock_rt_info as sri2
+            where sri2.stock_code = #{code}
+              and cur_time between #{startTime} and #{endTime}
+        )
+          and stock_code = #{code}
+    </select>
+    <select id="getstockTradingOnScreen" resultType="java.util.Map">
+        select
+            date_format(sri.cur_time, '%Y%m%d%H:%m') as date,
+            sri.trade_amount as tradeAmt,
+            sri.trade_volume as tradeVol,
+            sri.cur_price as tradePrice
+        from stock_rt_info as sri
+        where sri.stock_code = #{code}
+        order by cur_time desc
+            limit 10
+    </select>
+
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from stock_rt_info
         where  id = #{id,jdbcType=BIGINT} 

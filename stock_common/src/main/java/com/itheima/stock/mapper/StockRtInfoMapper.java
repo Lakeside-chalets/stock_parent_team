@@ -66,7 +66,7 @@ public interface StockRtInfoMapper {
      * @return
      */
     List<Stock4MinuteDomain> getStock4MinuteInfo(@Param("openDate") Date openDate, @Param("enDate") Date enDate, @Param("stockCode") String stockCode);
-
+//日K线
     /**
      * 获取指定日期范围内的收盘日期
      * @param stockCode 股票编码
@@ -85,6 +85,14 @@ public interface StockRtInfoMapper {
      */
     List<Stock4EvrDayDomain> getStockByDayKlin(@Param("stockCode") String stockCode,
                                                      @Param("dates") List<Date> dates);
+//周K线
+    /**
+     * 获取指定股票在指定周期下的数据
+     * @param code 股票编码
+     * @param dates 指定日期集合
+     * @return
+     */
+    List<Map<String, Object>> getStockByWeekline(@Param("code") String code, @Param("dates") List<Date> dates);
     /**
      * 批量插入个股数据
      * @param list
@@ -98,4 +106,20 @@ public interface StockRtInfoMapper {
      * @return
      */
     List<Map<String, Object>> getInfobyFuzzySearch(@Param("searchStrFuzzy") String searchStrFuzzy);
+
+    /**
+     * 获取最新的行情数据到面板上
+     * @param code 股票编码
+     * @param startTime 开盘时间
+     * @param endTime 截止时间
+     * @return
+     */
+    Map<String, Object> getstockScreenTimeSharingInfo(@Param("code") String code, @Param("startTime") Date startTime, @Param("endTime") Date endTime);
+
+    /**
+     * 个股交易流水行情数据显示
+     * @param code
+     * @return
+     */
+    List<Map<String, Object>> getstockTradingOnScreen(@Param("code") String code);
 }
