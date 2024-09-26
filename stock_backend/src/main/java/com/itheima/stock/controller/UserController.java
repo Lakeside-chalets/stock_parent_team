@@ -3,6 +3,7 @@ package com.itheima.stock.controller;
 import com.itheima.stock.pojo.entity.SysUser;
 import com.itheima.stock.service.UserService;
 import com.itheima.stock.vo.req.LoginReqVo;
+import com.itheima.stock.vo.req.UserAddReqVo;
 import com.itheima.stock.vo.req.UserPageReqVo;
 import com.itheima.stock.vo.resp.LoginRespVo;
 import com.itheima.stock.vo.resp.PageResult;
@@ -14,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -86,4 +88,33 @@ public class UserController {
     public R<PageResult> getUserListPage(@RequestBody UserPageReqVo userPageReqVo) {
         return userService.getUserListPage(userPageReqVo);
     }
+
+    /**
+     * 添加用户
+     * @param userAddReqVo
+     * @return
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "UserAddReqVo", name = "userAddReqVo", value = "", required = true)
+    })
+    @ApiOperation(value = "添加用户", notes = "添加用户", httpMethod = "POST")
+    @PostMapping("/user")
+    public R<String> addUsers (@RequestBody UserAddReqVo userAddReqVo){
+        return userService.addUsers(userAddReqVo);
+    }
+
+    /**
+     * 根据用户id获取角色
+     * @param userId
+     * @return
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path", dataType = "long", name = "userId", value = "", required = true)
+    })
+    @ApiOperation(value = "根据用户id获取角色", notes = "根据用户id获取角色", httpMethod = "GET")
+    @GetMapping("/user/roles/{userId}")//路径传参数
+    public R<Map<String, List>> getRoleByUserId(@PathVariable ("userId") Long userId){
+        return userService.getRoleByUserId(userId);
+    }
+
 }

@@ -5,15 +5,19 @@ import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.captcha.generator.CodeGenerator;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.itheima.stock.Exception.BusinessException;
 import com.itheima.stock.constant.StockConstant;
+import com.itheima.stock.mapper.SysRoleMapper;
 import com.itheima.stock.mapper.SysUserMapper;
 import com.itheima.stock.pojo.domain.UserPageListInfoDomain;
 import com.itheima.stock.pojo.entity.SysPermission;
+import com.itheima.stock.pojo.entity.SysRole;
 import com.itheima.stock.pojo.entity.SysUser;
 import com.itheima.stock.service.PermissionService;
 import com.itheima.stock.service.UserService;
 import com.itheima.stock.utils.IdWorker;
 import com.itheima.stock.vo.req.LoginReqVo;
+import com.itheima.stock.vo.req.UserAddReqVo;
 import com.itheima.stock.vo.req.UserPageReqVo;
 import com.itheima.stock.vo.resp.*;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +31,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +64,8 @@ public class UserServiceImpl implements UserService {
     private RedisTemplate redisTemplate;
     @Autowired
     private PermissionService permissionService;
+    @Autowired
+    private SysRoleMapper sysRoleMapper;
 
     /**
      * 根据用户名称查询用户信息
@@ -199,6 +206,66 @@ public class UserServiceImpl implements UserService {
         PageResult<UserPageListInfoDomain> pageResult = new PageResult<>(pageInfo);
         //响应数据
         return R.ok(pageResult);
+    }
+
+    /**
+     * 添加用户
+     * @param userAddReqVo 请求参数
+     * @return
+     */
+    @Override
+    public R<String> addUsers(UserAddReqVo userAddReqVo) {
+        //判断用户是否存在
+        SysUser sysUser = sysUserMapper.findByUserName(userAddReqVo.getUsername());
+        if (sysUser != null) {
+            return R.error(ResponseCode.ACCOUNT_EXISTS_ERROR);
+        }
+        //创建新用户容器
+        SysUser user = new SysUser();
+        //将userAddVo中的数据复制到user中
+        BeanUtils.copyProperties(userAddReqVo,user);
+        //设置用户的id
+        user.setId(idWorker.nextId());
+        //设置密码,并将密码加密
+        user.setPassword(passwordEncoder.encode(userAddReqVo.getPassword()));
+//        //设置邮箱
+//        user.setEmail(userAddReqVo.getEmail());
+//        //设置昵称
+//        user.setNickName(userAddReqVo.getNickName());
+//        //设置真实姓名
+//        user.setRealName(userAddReqVo.getRealName());
+//        //设置性别
+//        user.setSex(userAddReqVo.getSex());
+         //添加更新和创建时间
+        user.setCreateTime(new Date());
+        user.setUpdateTime(new Date());
+        //添加是否被删除
+        user.setDeleted(1);
+
+        //插入数据
+        int row = sysUserMapper.insert(user);
+        if (row != 1) {
+            throw new BusinessException(ResponseCode.ERROR.getMessage());
+        }
+        return R.ok(ResponseCode.SUCCESS.getMessage());
+    }
+
+    /**
+     * 根据用户id获取角色
+     * @param userId 用户id
+     * @return
+     */
+    @Override
+    public R<Map<String, List>> getRoleByUserId(Long userId) {
+        //获取角色id集合
+       List<Long> roleIds = sysUserMapper.findRolesIdByUserId(userId);
+        //用mapper查询所有角色的集合
+       List<SysRole> roles = sysRoleMapper.findAllroles();
+       //封装
+        HashMap<String , List> map = new HashMap<>();
+        map.put("allRole",roles);
+        map.put("ownRoleIds",roleIds);
+        return R.ok(map);
     }
 
 }

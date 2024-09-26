@@ -42,4 +42,11 @@ public interface SysUserMapper {
      * @return
      */
     List<UserPageListInfoDomain> findUserAllInfoByPage(@Param("userName") String username, @Param("nickName") String nickName, @Param("startTime") String startTime, @Param("endTime") String endTime);
+
+    /**
+     * 根据用户Id获取角色Id
+     * @param userId 用户Id
+     * @return
+     */
+    List<Long> findRolesIdByUserId(@Param("userId") Long userId);
 }

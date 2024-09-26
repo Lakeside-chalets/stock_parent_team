@@ -1,6 +1,9 @@
 package com.itheima.stock.mapper;
 
 import com.itheima.stock.pojo.entity.SysRole;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
 * @author mianbaoren
@@ -22,4 +25,9 @@ public interface SysRoleMapper {
 
     int updateByPrimaryKey(SysRole record);
 
+    /**
+     * 查询所有角色
+     * @return
+     */
+    List<SysRole> findAllroles();
 }

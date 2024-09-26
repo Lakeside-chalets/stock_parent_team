@@ -2,12 +2,14 @@ package com.itheima.stock.service;
 
 import com.itheima.stock.pojo.entity.SysUser;
 import com.itheima.stock.vo.req.LoginReqVo;
+import com.itheima.stock.vo.req.UserAddReqVo;
 import com.itheima.stock.vo.req.UserPageReqVo;
 import com.itheima.stock.vo.resp.LoginRespVo;
 import com.itheima.stock.vo.resp.PageResult;
 import com.itheima.stock.vo.resp.R;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,4 +46,18 @@ public interface UserService {
      * @return
      */
     R<PageResult> getUserListPage(@Param("userPageReqVo") UserPageReqVo userPageReqVo);
+
+    /**
+     * 添加用户
+     * @param userAddReqVo 请求参数
+     * @return
+     */
+    R<String> addUsers(@Param("userAddReqVo") UserAddReqVo userAddReqVo);
+
+    /**
+     * 根据用户id获取角色
+     * @param userId 用户id
+     * @return
+     */
+    R<Map<String, List>> getRoleByUserId(@Param("userId") Long userId);
 }
