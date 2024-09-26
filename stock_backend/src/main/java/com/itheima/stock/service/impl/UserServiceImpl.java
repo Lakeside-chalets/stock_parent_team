@@ -3,17 +3,22 @@ package com.itheima.stock.service.impl;
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.captcha.generator.CodeGenerator;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.itheima.stock.constant.StockConstant;
 import com.itheima.stock.mapper.SysUserMapper;
+import com.itheima.stock.pojo.domain.UserPageListInfoDomain;
+import com.itheima.stock.pojo.entity.SysPermission;
 import com.itheima.stock.pojo.entity.SysUser;
+import com.itheima.stock.service.PermissionService;
 import com.itheima.stock.service.UserService;
 import com.itheima.stock.utils.IdWorker;
 import com.itheima.stock.vo.req.LoginReqVo;
-import com.itheima.stock.vo.resp.LoginRespVo;
-import com.itheima.stock.vo.resp.R;
-import com.itheima.stock.vo.resp.ResponseCode;
+import com.itheima.stock.vo.req.UserPageReqVo;
+import com.itheima.stock.vo.resp.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -23,8 +28,10 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName: UserServiceImpl
@@ -50,6 +57,9 @@ public class UserServiceImpl implements UserService {
     private IdWorker idWorker;
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private PermissionService permissionService;
+
     /**
      * 根据用户名称查询用户信息
      * @param userName 用户名称
@@ -101,15 +111,29 @@ public class UserServiceImpl implements UserService {
         }
 
        //4.响应
-        LoginRespVo reqsVo = new LoginRespVo();
+        LoginRespVo loginRespvo = new LoginRespVo();
 
 //        reqsVo.setUsername(dbUser.getUsername());
 //        reqsVo.setNickName(dbUser.getNickName());
 //        reqsVo.setPhone(dbUser.getPhone());
 //        reqsVo.setId(dbUser.getId());
         //发现LoginRespVo和SysUser对象属性名称和类型一致
-        BeanUtils.copyProperties(dbUser,reqsVo);
-        return R.ok(reqsVo);
+        BeanUtils.copyProperties(dbUser,loginRespvo);
+        //获取指定用户的权限集合，添加获取侧边栏数据和按钮权限的结合信息
+       List<SysPermission> permissions = permissionService.findPermissionsByUserId(dbUser.getId());
+        //获取树状权限菜单数据，调用permissionService方法
+       List<LoginRespPermission> menus = permissionService.getTree(permissions,0l,true);
+       //获取菜单按钮集合
+        List<String> authBtnPerms = permissions.stream()
+                .filter(per -> !Strings.isNullOrEmpty(per.getCode()) && per.getType() == 3)
+                .map(per -> per.getCode()).collect(Collectors.toList());
+        //封装按钮
+        loginRespvo.setMenus(menus);
+        loginRespvo.setPermissions(authBtnPerms);
+        //生成token
+        loginRespvo.setAccessToken(dbUser.getId()+":"+dbUser.getUsername());
+
+        return R.ok(loginRespvo);
     }
 
     @Override
@@ -158,4 +182,23 @@ public class UserServiceImpl implements UserService {
         return R.ok(data);
 
     }
+
+    /**
+     * 获取用户信息分页查询条件包含：分页信息 用户创建日期范围
+     * @param userPageReqVo 用户信息请求参数
+     * @return
+     */
+    @Override
+    public R<PageResult> getUserListPage(UserPageReqVo userPageReqVo) {
+        //获取分页参数
+        PageHelper.startPage(userPageReqVo.getPageNum(),userPageReqVo.getPageSize());
+        //根据多条件进行mapper查询
+        List<UserPageListInfoDomain> users = sysUserMapper.findUserAllInfoByPage(userPageReqVo.getUsername(),userPageReqVo.getNickName(),userPageReqVo.getStartTime(),userPageReqVo.getEndTime());
+        //将返回的数据封装到PageInfo中
+        PageInfo<UserPageListInfoDomain> pageInfo = new PageInfo<>(users);
+        PageResult<UserPageListInfoDomain> pageResult = new PageResult<>(pageInfo);
+        //响应数据
+        return R.ok(pageResult);
+    }
+
 }

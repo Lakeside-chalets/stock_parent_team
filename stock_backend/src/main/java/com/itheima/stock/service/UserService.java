@@ -2,8 +2,11 @@ package com.itheima.stock.service;
 
 import com.itheima.stock.pojo.entity.SysUser;
 import com.itheima.stock.vo.req.LoginReqVo;
+import com.itheima.stock.vo.req.UserPageReqVo;
 import com.itheima.stock.vo.resp.LoginRespVo;
+import com.itheima.stock.vo.resp.PageResult;
 import com.itheima.stock.vo.resp.R;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.Map;
 
@@ -34,4 +37,11 @@ public interface UserService {
      * @return
      */
     R<Map> getCaptchaCode();
+
+    /**
+     * 获取用户信息分页查询条件包含：分页信息 用户创建日期范围
+     * @param userPageReqVo 用户信息请求参数
+     * @return
+     */
+    R<PageResult> getUserListPage(@Param("userPageReqVo") UserPageReqVo userPageReqVo);
 }

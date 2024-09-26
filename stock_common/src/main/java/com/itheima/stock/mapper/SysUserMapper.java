@@ -1,7 +1,10 @@
 package com.itheima.stock.mapper;
 
+import com.itheima.stock.pojo.domain.UserPageListInfoDomain;
 import com.itheima.stock.pojo.entity.SysUser;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
 * @author mianbaoren
@@ -29,4 +32,14 @@ public interface SysUserMapper {
      * @return
      */
     SysUser findByUserName(@Param("name") String userName);
+
+    /**
+     * 多条件查询用户信息
+     * @param username 用户名
+     * @param nickName 昵称
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return
+     */
+    List<UserPageListInfoDomain> findUserAllInfoByPage(@Param("userName") String username, @Param("nickName") String nickName, @Param("startTime") String startTime, @Param("endTime") String endTime);
 }

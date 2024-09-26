@@ -1,6 +1,9 @@
 package com.itheima.stock.mapper;
 
 import com.itheima.stock.pojo.entity.SysPermission;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
 * @author mianbaoren
@@ -22,4 +25,10 @@ public interface SysPermissionMapper {
 
     int updateByPrimaryKey(SysPermission record);
 
+    /**
+     * 根据用户id查询用户的所有权限
+     * @param id
+     * @return
+     */
+    List<SysPermission> findPermissionsByUserId(@Param("id") Long id);
 }

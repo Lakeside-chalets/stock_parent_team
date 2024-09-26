@@ -261,70 +261,95 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
     /**
      * 获取国外大盘的实时数据信息
      */
+    //方案一
+//    @Override
+//    public void getStockOuterMarketInfo() {
+//    //1.采集原始数据
+//        //1.1组装url地址
+//        String url = stockInfoConfig.getMarketUrl() + String.join(",", stockInfoConfig.getOuter());
+//        //发起请求
+//        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
+//        int statusCodeValue = responseEntity.getStatusCodeValue();
+//        if (statusCodeValue != 200) {
+//            //当前请求失败
+//            log.error("当前时间点:{},采集数据失败，http状态码:{}", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), statusCodeValue);
+//            //其他（发送邮件……）
+//            return;
+//        }
+//        //获取js格式的数据
+//        String jsData = responseEntity.getBody();
+//        log.info("当前时间点:{},采集原始数据内容：{}", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), jsData);
+//    //2.java正则解析原始数据
+//        //2.1定义正则表达式
+//        String reg = "var hq_str_(.+)=\"(.+)\";";
+//        //2.2表达式编译
+//        Pattern pattern = Pattern.compile(reg);
+//        //2.3匹配字符串
+//        Matcher matcher = pattern.matcher(jsData);
+//        List<StockOuterMarketIndexInfo> entities = new ArrayList<>();
+//        while (matcher.find()) {
+//            //1.获取大盘的编码
+//            String marketCode = matcher.group(1);
+//            //2.获取其他信息
+//            String otherInfo = matcher.group(2);
+//            //将other数据用 , 切割，获取大盘的数据信息
+//            String[] splitArr = otherInfo.split(",");
+//            //大盘名称
+//            String marketName = splitArr[0];
+//            //获取大盘的当前点数
+//            BigDecimal curPoint = new BigDecimal(splitArr[1]);
+//            //获取大盘涨跌值
+//            BigDecimal updown = new BigDecimal(splitArr[2]);
+//            //获取大盘的涨幅
+//            BigDecimal rose = new BigDecimal(splitArr[3]);
+//            //时间
+//            Date curTime = DateTimeUtil.getDateTimeWithoutSecond(DateTime.now()) .toDate();
+////            3.解析的数据封装entity
+//            StockOuterMarketIndexInfo entity = StockOuterMarketIndexInfo.builder()
+//                    .id(idWorker.nextId())
+//                    .marketName(marketName)
+//                    .curPoint(curPoint)
+//                    .marketCode(marketCode)
+//                    .updown(updown)
+//                    .rose(rose)
+//                    .curTime(curTime)
+//                    .build();
+//            entities.add(entity);
+//        }
+//        log.info("解析数据完毕!");
+//        //4.调用mybatis批量入库
+//        int count = stockOuterMarketIndexInfoMapper.insertBatch(entities);
+//        if (count > 0) {
+//            //大盘采集完毕后，通知backend工程刷新缓存
+//            //发送日期对象，接收方通过接收的日期与当前日期对比，能判断出数据延迟的时常问题
+//            rabbitTemplate.convertAndSend("stockExchange", "inner.market", new Date());
+//            log.info("当前时间点:{},插入大盘数据:{}成功", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), entities);
+//        } else {
+//            log.info("当前时间点:{},插入大盘数据:{}失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), entities);
+//        }
+//    }
     @Override
     public void getStockOuterMarketInfo() {
-    //1.采集原始数据
-        //1.1组装url地址
-        String url = stockInfoConfig.getMarketUrl() + String.join(",", stockInfoConfig.getOuter());
+        //获取国外大盘名称集合
+        List<String> outerMarket = stockInfoConfig.getOuter();
+        //获取请求url地址
+        String url = stockInfoConfig.getMarketUrl();
+        //将url拼接起来
+        String marketUrl = url+String.join(",",outerMarket);
         //发起请求
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
-        int statusCodeValue = responseEntity.getStatusCodeValue();
-        if (statusCodeValue != 200) {
-            //当前请求失败
-            log.error("当前时间点:{},采集数据失败，http状态码:{}", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), statusCodeValue);
-            //其他（发送邮件……）
-            return;
+        ResponseEntity<String> responseEntity = restTemplate.exchange(marketUrl, HttpMethod.GET, httpEntity, String.class);
+        //获取响应的js数据
+        String body = responseEntity.getBody();
+        //调用工具类解析获取各个数据
+        List<StockOuterMarketIndexInfo> list = parserStockInfoUtil.parser4StockOrMarketInfo(body, ParseType.OUTER);
+        log.info("获取外盘数据:{}",list);
+        //将调用mapper接口数据保存到数据库中  //批量插入
+        int row = stockOuterMarketIndexInfoMapper.insertBatch(list);
+        if (row>0) {
+            log.info("当前时间点:{},插入国外大盘数据:{}成功",DateTime.now().toString("yyyy-MM-dd HH:mm:ss"),list);
+        }else {
+            log.info("当前时间点:{},插入国外大盘数据:{}失败",DateTime.now().toString("yyyy-MM-dd HH:mm:ss"),list);
         }
-        //获取js格式的数据
-        String jsData = responseEntity.getBody();
-        log.info("当前时间点:{},采集原始数据内容：{}", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), jsData);
-    //2.java正则解析原始数据
-        //2.1定义正则表达式
-        String reg = "var hq_str_(.+)=\"(.+)\";";
-        //2.2表达式编译
-        Pattern pattern = Pattern.compile(reg);
-        //2.3匹配字符串
-        Matcher matcher = pattern.matcher(jsData);
-        List<StockOuterMarketIndexInfo> entities = new ArrayList<>();
-        while (matcher.find()) {
-            //1.获取大盘的编码
-            String marketCode = matcher.group(1);
-            //2.获取其他信息
-            String otherInfo = matcher.group(2);
-            //将other数据用 , 切割，获取大盘的数据信息
-            String[] splitArr = otherInfo.split(",");
-            //大盘名称
-            String marketName = splitArr[0];
-            //获取大盘的当前点数
-            BigDecimal curPoint = new BigDecimal(splitArr[1]);
-            //获取大盘涨跌值
-            BigDecimal updown = new BigDecimal(splitArr[2]);
-            //获取大盘的涨幅
-            BigDecimal rose = new BigDecimal(splitArr[3]);
-            //时间
-            Date curTime = DateTimeUtil.getDateTimeWithoutSecond(DateTime.now()) .toDate();
-//            3.解析的数据封装entity
-            StockOuterMarketIndexInfo entity = StockOuterMarketIndexInfo.builder()
-                    .id(idWorker.nextId())
-                    .marketName(marketName)
-                    .curPoint(curPoint)
-                    .marketCode(marketCode)
-                    .updown(updown)
-                    .rose(rose)
-                    .curTime(curTime)
-                    .build();
-            entities.add(entity);
-        }
-        log.info("解析数据完毕!");
-        //4.调用mybatis批量入库
-        int count = stockOuterMarketIndexInfoMapper.insertBatch(entities);
-        if (count > 0) {
-            //大盘采集完毕后，通知backend工程刷新缓存
-            //发送日期对象，接收方通过接收的日期与当前日期对比，能判断出数据延迟的时常问题
-            rabbitTemplate.convertAndSend("stockExchange", "inner.market", new Date());
-            log.info("当前时间点:{},插入大盘数据:{}成功", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), entities);
-        } else {
-            log.info("当前时间点:{},插入大盘数据:{}失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), entities);
-        }
+
     }
 }

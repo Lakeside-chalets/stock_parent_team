@@ -3,7 +3,9 @@ package com.itheima.stock.controller;
 import com.itheima.stock.pojo.entity.SysUser;
 import com.itheima.stock.service.UserService;
 import com.itheima.stock.vo.req.LoginReqVo;
+import com.itheima.stock.vo.req.UserPageReqVo;
 import com.itheima.stock.vo.resp.LoginRespVo;
+import com.itheima.stock.vo.resp.PageResult;
 import com.itheima.stock.vo.resp.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -21,9 +23,9 @@ import java.util.Map;
  * @Author: mianbaoren
  * @Date: 2024/8/27 14:26
  */
+@Api(value = "/api", tags = {": 定义用户web层接口资源bean"})
 @RestController
 @RequestMapping("/api")
-@Api(tags = "用户相关接口处理器")
 public class UserController {
 
     /**
@@ -37,11 +39,10 @@ public class UserController {
      * @param name
      * @return
      */
-    @ApiOperation(value = "根据用户名查询用户信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "name",value = "用户名",dataType = "string",required = true,type = "path")
-
+            @ApiImplicitParam(paramType = "path", dataType = "string", name = "userName", value = "", required = true)
     })
+    @ApiOperation(value = "根据用户名查询用户信息", notes = "根据用户名称查询用户信息", httpMethod = "GET")
     @GetMapping("/user/{userName}")
     public SysUser getUserByUserName (@PathVariable("userName")  String name){
         return userService.findByUserName(name);
@@ -72,5 +73,17 @@ public class UserController {
         return userService.getCaptchaCode();
     }
 
-
+    /**
+     * 多条件查询,查询用户所有信息
+     * @param userPageReqVo
+     * @return
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "UserPageReqVo", name = "userPageReqVo", value = "", required = true)
+    })
+    @ApiOperation(value = "多条件查询,查询用户所有信息", notes = "多条件查询,查询用户所有信息", httpMethod = "POST")
+    @PostMapping("/users")
+    public R<PageResult> getUserListPage(@RequestBody UserPageReqVo userPageReqVo) {
+        return userService.getUserListPage(userPageReqVo);
+    }
 }
