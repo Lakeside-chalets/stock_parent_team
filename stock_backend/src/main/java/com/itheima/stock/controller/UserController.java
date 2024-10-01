@@ -4,6 +4,7 @@ import com.itheima.stock.pojo.entity.SysUser;
 import com.itheima.stock.service.UserService;
 import com.itheima.stock.vo.req.LoginReqVo;
 import com.itheima.stock.vo.req.UserAddReqVo;
+import com.itheima.stock.vo.req.UserOneRoleReqVo;
 import com.itheima.stock.vo.req.UserPageReqVo;
 import com.itheima.stock.vo.resp.LoginRespVo;
 import com.itheima.stock.vo.resp.PageResult;
@@ -116,5 +117,34 @@ public class UserController {
     public R<Map<String, List>> getRoleByUserId(@PathVariable ("userId") Long userId){
         return userService.getRoleByUserId(userId);
     }
+
+    /**
+     * 更新用户角色信息
+     * @param vo
+     * @return
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "UserOneRoleReqVo", name = "vo", value = "", required = true)
+    })
+    @ApiOperation(value = "更新用户角色信息", notes = "更新用户角色信息", httpMethod = "PUT")
+    @PutMapping("/user/roles")
+    public R<String> updateUserRolesInfo ( @RequestBody  UserOneRoleReqVo vo){
+        return userService.updateUserRolesInfo(vo);
+    }
+
+    /**
+     * 批量删除用户信息
+     * @param userIds
+     * @return
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "List<Long>", name = "userIds", value = "", required = true)
+    })
+    @ApiOperation(value = "批量删除用户信息", notes = "批量删除用户信息", httpMethod = "DELETE")
+    @DeleteMapping("/user")
+    public R<String> DeleteByUserid (@RequestBody List<Long> userIds){
+        return userService.DeleteByUserid(userIds);
+    }
+
 
 }

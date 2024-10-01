@@ -49,4 +49,11 @@ public interface SysUserMapper {
      * @return
      */
     List<Long> findRolesIdByUserId(@Param("userId") Long userId);
+
+    /**
+     * 逻辑删除用户信息，就是将delete变成为0
+     * @param userIds
+     * @return
+     */
+    int DeleteByUserid(@Param("userIds") List<Long> userIds);
 }

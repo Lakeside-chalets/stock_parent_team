@@ -1,6 +1,9 @@
 package com.itheima.stock.mapper;
 
 import com.itheima.stock.pojo.entity.SysUserRole;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
 * @author mianbaoren
@@ -22,4 +25,17 @@ public interface SysUserRoleMapper {
 
     int updateByPrimaryKey(SysUserRole record);
 
+    /**
+     * 根据用户的id删除用户对应的角色信息
+     * @param userId
+     */
+    void deleteByUserId(@Param("userId") Long userId);
+
+
+    /**
+     * 批量插入用户角色信息
+     * @param list
+     * @return
+     */
+    int insertUserRoleBatch(@Param("list") List<SysUserRole> list);
 }

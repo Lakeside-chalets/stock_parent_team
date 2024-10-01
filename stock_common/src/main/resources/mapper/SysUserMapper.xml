@@ -77,6 +77,7 @@
         delete from sys_user
         where  username = #{userName}
     </delete>
+
     <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.itheima.stock.pojo.entity.SysUser" useGeneratedKeys="true">
         insert into sys_user
 
@@ -196,5 +197,11 @@
             create_time =  #{createTime,jdbcType=TIMESTAMP},
             update_time =  #{updateTime,jdbcType=TIMESTAMP}
         where   id = #{id,jdbcType=BIGINT} 
+    </update>
+    <update id="DeleteByUserid">
+        update sys_user set deleted =0,update_time=now() where id in
+        <foreach collection="userIds" item="userId" separator="," open="(" close=")">
+            #{userId}
+        </foreach>
     </update>
 </mapper>

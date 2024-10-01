@@ -3,21 +3,25 @@ package com.itheima.stock.service.impl;
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.captcha.generator.CodeGenerator;
+import cn.hutool.core.date.DateTime;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.itheima.stock.Exception.BusinessException;
 import com.itheima.stock.constant.StockConstant;
 import com.itheima.stock.mapper.SysRoleMapper;
 import com.itheima.stock.mapper.SysUserMapper;
+import com.itheima.stock.mapper.SysUserRoleMapper;
 import com.itheima.stock.pojo.domain.UserPageListInfoDomain;
 import com.itheima.stock.pojo.entity.SysPermission;
 import com.itheima.stock.pojo.entity.SysRole;
 import com.itheima.stock.pojo.entity.SysUser;
+import com.itheima.stock.pojo.entity.SysUserRole;
 import com.itheima.stock.service.PermissionService;
 import com.itheima.stock.service.UserService;
 import com.itheima.stock.utils.IdWorker;
 import com.itheima.stock.vo.req.LoginReqVo;
 import com.itheima.stock.vo.req.UserAddReqVo;
+import com.itheima.stock.vo.req.UserOneRoleReqVo;
 import com.itheima.stock.vo.req.UserPageReqVo;
 import com.itheima.stock.vo.resp.*;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +33,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.awt.*;
-import java.util.Date;
-import java.util.HashMap;
+import java.sql.Array;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -66,6 +71,8 @@ public class UserServiceImpl implements UserService {
     private PermissionService permissionService;
     @Autowired
     private SysRoleMapper sysRoleMapper;
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
 
     /**
      * 根据用户名称查询用户信息
@@ -266,6 +273,67 @@ public class UserServiceImpl implements UserService {
         map.put("allRole",roles);
         map.put("ownRoleIds",roleIds);
         return R.ok(map);
+    }
+
+    /**
+     * 更新用户角色信息
+     * @param vo
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)//需要对数据库进行频繁操作，所以加上事务管理回滚
+    public R<String> updateUserRolesInfo(UserOneRoleReqVo vo) {
+        //先判断用户id是否存在
+        if (vo.getUserId() == null) {
+            throw new BusinessException(ResponseCode.ERROR.getMessage());
+        }
+        //先删除用户原来拥有的角色信息，再插入用户的新角色
+        sysUserRoleMapper.deleteByUserId(vo.getUserId());
+        //判断传递来的角色集合是否为空（判断是否删除干净）
+        if (CollectionUtils.isEmpty(vo.getRoleIds())) {
+            //如果为空，说明用户的角色信息全部清空了
+            return R.ok(ResponseCode.SUCCESS.getMessage());
+        }
+        //循环插入角色信息
+            //封装用户的角色信息
+        List<SysUserRole> list = new ArrayList<>();
+        for (Long roleId : vo.getRoleIds()) {
+            SysUserRole sysUserRole = new SysUserRole();
+            sysUserRole.setId(idWorker.nextId());
+            sysUserRole.setUserId(vo.getUserId());
+            sysUserRole.setRoleId(roleId);
+            sysUserRole.setCreateTime(new Date());
+            //装角色入集合
+            list.add(sysUserRole);
+        }
+        //批量插入用户角色的信息
+        int row = sysUserRoleMapper.insertUserRoleBatch(list);
+
+        if (row == 0) {
+            //如果插入失败，则返回错误信息
+            throw new BusinessException(ResponseCode.ERROR.getMessage());
+        }
+        return R.ok(ResponseCode.SUCCESS.getMessage());
+    }
+
+    /**
+     * 批量删除用户信息
+     * @param userIds
+     * @return
+     */
+    @Override
+    public R<String> DeleteByUserid(List<Long> userIds) {
+        //判断传入的集合是否为空
+        if(CollectionUtils.isEmpty(userIds)){
+            throw new BusinessException(ResponseCode.ERROR.getMessage());
+        }
+        //删除用户就是将用户deleted改为0 ，不完全删除
+        int row = sysUserMapper.DeleteByUserid(userIds);
+        //如果删除失败
+        if (row == 0) {
+            throw new BusinessException(ResponseCode.ERROR.getMessage());
+        }
+        return R.ok(ResponseCode.SUCCESS.getMessage());
     }
 
 }

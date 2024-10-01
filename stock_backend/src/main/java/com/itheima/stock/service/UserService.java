@@ -3,6 +3,7 @@ package com.itheima.stock.service;
 import com.itheima.stock.pojo.entity.SysUser;
 import com.itheima.stock.vo.req.LoginReqVo;
 import com.itheima.stock.vo.req.UserAddReqVo;
+import com.itheima.stock.vo.req.UserOneRoleReqVo;
 import com.itheima.stock.vo.req.UserPageReqVo;
 import com.itheima.stock.vo.resp.LoginRespVo;
 import com.itheima.stock.vo.resp.PageResult;
@@ -60,4 +61,18 @@ public interface UserService {
      * @return
      */
     R<Map<String, List>> getRoleByUserId(@Param("userId") Long userId);
+
+    /**
+     * 更新用户角色信息
+     * @param vo
+     * @return
+     */
+    R<String> updateUserRolesInfo(@Param("vo") UserOneRoleReqVo vo);
+
+    /**
+     * 批量删除用户信息
+     * @param userIds
+     * @return
+     */
+    R<String> DeleteByUserid(@Param("userIds") List<Long> userIds);
 }
