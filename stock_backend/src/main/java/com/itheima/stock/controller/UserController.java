@@ -2,13 +2,11 @@ package com.itheima.stock.controller;
 
 import com.itheima.stock.pojo.entity.SysUser;
 import com.itheima.stock.service.UserService;
-import com.itheima.stock.vo.req.LoginReqVo;
-import com.itheima.stock.vo.req.UserAddReqVo;
-import com.itheima.stock.vo.req.UserOneRoleReqVo;
-import com.itheima.stock.vo.req.UserPageReqVo;
+import com.itheima.stock.vo.req.*;
 import com.itheima.stock.vo.resp.LoginRespVo;
 import com.itheima.stock.vo.resp.PageResult;
 import com.itheima.stock.vo.resp.R;
+import com.itheima.stock.vo.resp.UserInfoRespVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -146,5 +144,32 @@ public class UserController {
         return userService.DeleteByUserid(userIds);
     }
 
+    /**
+     * 根据用户id获取用户信息，完成个人资料展示
+     * @param userId 用户id
+     * @return
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path", dataType = "long", name = "userId", value = "用户id", required = true)
+    })
+    @ApiOperation(value = "根据用户id获取用户信息，完成个人资料展示", notes = "获根据用户id获取用户信息，完成个人资料展示", httpMethod = "GET")
+    @GetMapping("/user/info/{userId}")
+    public R<UserInfoRespVo> getUserInfo(@PathVariable("userId") Long userId){
+        return userService.getUserInfo(userId);
+    }
+
+    /**
+     * 据id更新用户基本信息
+     * @param vo
+     * @return
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "UserUpdateInfoVo", name = "vo", value = "", required = true)
+    })
+    @ApiOperation(value = "据id更新用户基本信息", notes = "据id更新用户基本信息", httpMethod = "PUT")
+    @PutMapping("/user")
+    public R<String> updateUserInfo(@RequestBody UserUpdateInfoVo vo){
+        return userService.updateUserInfo(vo);
+    }
 
 }

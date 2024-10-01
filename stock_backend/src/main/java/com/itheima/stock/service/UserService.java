@@ -1,13 +1,11 @@
 package com.itheima.stock.service;
 
 import com.itheima.stock.pojo.entity.SysUser;
-import com.itheima.stock.vo.req.LoginReqVo;
-import com.itheima.stock.vo.req.UserAddReqVo;
-import com.itheima.stock.vo.req.UserOneRoleReqVo;
-import com.itheima.stock.vo.req.UserPageReqVo;
+import com.itheima.stock.vo.req.*;
 import com.itheima.stock.vo.resp.LoginRespVo;
 import com.itheima.stock.vo.resp.PageResult;
 import com.itheima.stock.vo.resp.R;
+import com.itheima.stock.vo.resp.UserInfoRespVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -75,4 +73,18 @@ public interface UserService {
      * @return
      */
     R<String> DeleteByUserid(@Param("userIds") List<Long> userIds);
+
+    /**
+     * 获根据用户id获取用户信息，完成个人资料展示
+     * @param id 用户id
+     * @return
+     */
+    R<UserInfoRespVo> getUserInfo(@Param("id") Long id);
+
+    /**
+     * 据id更新用户基本信息
+     * @param vo
+     * @return
+     */
+    R<String> updateUserInfo(@Param("vo") UserUpdateInfoVo vo);
 }

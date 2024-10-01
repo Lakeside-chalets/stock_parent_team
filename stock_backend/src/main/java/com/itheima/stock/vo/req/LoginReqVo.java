@@ -6,7 +6,7 @@ import lombok.Data;
 
 /**
  * @ClassName: LoginReqVo
- * @Description: TODO
+ * @Description: 登录请求参数
  * @Author: mianbaoren
  * @Date: 2024/8/29 14:18
  */

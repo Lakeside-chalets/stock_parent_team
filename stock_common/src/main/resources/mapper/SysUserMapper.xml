@@ -181,22 +181,51 @@
     </update>
     <update id="updateByPrimaryKey" parameterType="com.itheima.stock.pojo.entity.SysUser">
         update sys_user
-        set 
-            username =  #{username,jdbcType=VARCHAR},
-            password =  #{password,jdbcType=VARCHAR},
-            phone =  #{phone,jdbcType=VARCHAR},
-            real_name =  #{realName,jdbcType=VARCHAR},
-            nick_name =  #{nickName,jdbcType=VARCHAR},
-            email =  #{email,jdbcType=VARCHAR},
-            status =  #{status,jdbcType=TINYINT},
-            sex =  #{sex,jdbcType=TINYINT},
-            deleted =  #{deleted,jdbcType=TINYINT},
-            create_id =  #{createId,jdbcType=BIGINT},
-            update_id =  #{updateId,jdbcType=BIGINT},
-            create_where =  #{createWhere,jdbcType=TINYINT},
-            create_time =  #{createTime,jdbcType=TIMESTAMP},
-            update_time =  #{updateTime,jdbcType=TIMESTAMP}
-        where   id = #{id,jdbcType=BIGINT} 
+        <set>
+            <if test="username != null">
+                username = #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null">
+                password = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null">
+                phone = #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="realName != null">
+                real_name = #{realName,jdbcType=VARCHAR},
+            </if>
+            <if test="nickName != null">
+                nick_name = #{nickName,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null">
+                email = #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=TINYINT},
+            </if>
+            <if test="sex != null">
+                sex = #{sex,jdbcType=TINYINT},
+            </if>
+            <if test="deleted != null">
+                deleted = #{deleted,jdbcType=TINYINT},
+            </if>
+            <if test="createId != null">
+                create_id = #{createId,jdbcType=VARCHAR},
+            </if>
+            <if test="updateId != null">
+                update_id = #{updateId,jdbcType=VARCHAR},
+            </if>
+            <if test="createWhere != null">
+                create_where = #{createWhere,jdbcType=TINYINT},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where   id = #{id,jdbcType=BIGINT}
     </update>
     <update id="DeleteByUserid">
         update sys_user set deleted =0,update_time=now() where id in

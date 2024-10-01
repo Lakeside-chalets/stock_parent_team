@@ -19,10 +19,7 @@ import com.itheima.stock.pojo.entity.SysUserRole;
 import com.itheima.stock.service.PermissionService;
 import com.itheima.stock.service.UserService;
 import com.itheima.stock.utils.IdWorker;
-import com.itheima.stock.vo.req.LoginReqVo;
-import com.itheima.stock.vo.req.UserAddReqVo;
-import com.itheima.stock.vo.req.UserOneRoleReqVo;
-import com.itheima.stock.vo.req.UserPageReqVo;
+import com.itheima.stock.vo.req.*;
 import com.itheima.stock.vo.resp.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -333,6 +330,47 @@ public class UserServiceImpl implements UserService {
         if (row == 0) {
             throw new BusinessException(ResponseCode.ERROR.getMessage());
         }
+        return R.ok(ResponseCode.SUCCESS.getMessage());
+    }
+
+    /**
+     * 获根据用户id获取用户信息，完成个人资料展示
+     * @param id 用户id
+     * @return
+     */
+    @Override
+    public R<UserInfoRespVo> getUserInfo(Long id) {
+        //判断id是否存在
+        if (id == null) {
+            throw new BusinessException(ResponseCode.ERROR.getMessage());
+        }
+        //根据id查询用户信息
+        SysUser sysUser = sysUserMapper.selectByPrimaryKey(id);
+        UserInfoRespVo userInfoRespVo = new UserInfoRespVo();
+        //将信息复制到个人资料里面
+        BeanUtils.copyProperties(sysUser,userInfoRespVo);
+        //响应数据
+        return R.ok(userInfoRespVo);
+    }
+
+    /**
+     * 据id更新用户基本信息
+     * @param vo
+     * @return
+     */
+    @Override
+    public R<String> updateUserInfo(UserUpdateInfoVo vo) {
+       //判断传入的请求参数是否为空
+        if (vo == null) {
+            throw new BusinessException(ResponseCode.DATA_ERROR.getMessage());
+        }
+        //将数据复制到SysUser类中
+        SysUser sysUser = new SysUser();
+        BeanUtils.copyProperties(vo,sysUser);
+        //修改的时间要更新
+        sysUser.setUpdateTime(new Date());
+        int row  = sysUserMapper.updateByPrimaryKey(sysUser);
+        //响应数据
         return R.ok(ResponseCode.SUCCESS.getMessage());
     }
 
