@@ -1,6 +1,10 @@
 package com.itheima.stock.mapper;
 
 import com.itheima.stock.pojo.entity.SysRolePermission;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Set;
 
 /**
 * @author mianbaoren
@@ -21,5 +25,20 @@ public interface SysRolePermissionMapper {
     int updateByPrimaryKeySelective(SysRolePermission record);
 
     int updateByPrimaryKey(SysRolePermission record);
+
+    /**
+     * 批量添加角色权限中间表数据
+     * @param list
+     * @return
+     */
+    int addRolePermissionInfo(@Param("list") List<SysRolePermission> list);
+
+    /**
+     * 根据角色id查找对应的权限id集合
+     * @param roleId
+     * @return
+     */
+    Set<String> getPermissionIdByRoleId(@Param("roleId") String roleId);
+
 
 }

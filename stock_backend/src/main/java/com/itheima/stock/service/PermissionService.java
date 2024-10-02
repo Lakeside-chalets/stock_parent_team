@@ -2,6 +2,7 @@ package com.itheima.stock.service;
 
 import com.itheima.stock.pojo.entity.SysPermission;
 import com.itheima.stock.vo.resp.LoginRespPermission;
+import com.itheima.stock.vo.resp.R;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -30,4 +31,10 @@ public interface PermissionService {
      * @return
      */
     List<LoginRespPermission> getTree(List<SysPermission> permissions, long pid, boolean isOnlyMenuType);
+
+    /**
+     * 树状结构回显权限集合,递归获取权限数据集合
+     * @return
+     */
+    R<List<LoginRespPermission>> getAllPermission();
 }

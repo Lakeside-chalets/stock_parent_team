@@ -31,4 +31,10 @@ public interface SysPermissionMapper {
      * @return
      */
     List<SysPermission> findPermissionsByUserId(@Param("id") Long id);
+
+    /**
+     * 获取所有权限集合
+     * @return
+     */
+    List<SysPermission> getAllPermission();
 }

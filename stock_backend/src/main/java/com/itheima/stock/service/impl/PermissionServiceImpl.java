@@ -5,6 +5,8 @@ import com.itheima.stock.mapper.SysPermissionMapper;
 import com.itheima.stock.pojo.entity.SysPermission;
 import com.itheima.stock.service.PermissionService;
 import com.itheima.stock.vo.resp.LoginRespPermission;
+import com.itheima.stock.vo.resp.R;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -18,7 +20,8 @@ import java.util.List;
  * @Author: mianbaoren
  * @Date: 2024/9/25 0:07
  */
-@Service
+@Service("permissionService")
+@Slf4j
 public class PermissionServiceImpl implements PermissionService {
 
     @Autowired
@@ -70,5 +73,19 @@ public class PermissionServiceImpl implements PermissionService {
             }
         }
         return list;
+    }
+
+    /**
+     * 树状结构回显权限集合,递归获取权限数据集合
+     * @return
+     */
+    @Override
+    public R<List<LoginRespPermission>> getAllPermission() {
+        //获取所有权限集合
+       List<SysPermission> permissions = sysPermissionMapper.getAllPermission();
+       //根据权限集合，遍历获取权限树
+        List<LoginRespPermission> list = getTree(permissions, 0l, true);
+        //响应数据
+        return R.ok(list);
     }
 }
