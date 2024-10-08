@@ -27,9 +27,8 @@
         where  id = #{id,jdbcType=BIGINT} 
     </select>
     <select id="findAllroles" resultType="com.itheima.stock.pojo.entity.SysRole">
-        select
-        <include refid="Base_Column_List" />
-        from sys_role
+        select <include refid="Base_Column_List" />
+        from sys_role where  deleted =1
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
