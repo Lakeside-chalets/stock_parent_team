@@ -1,17 +1,29 @@
 package com.itheima.stock.service.impl;
 
 import com.google.common.collect.Lists;
+import com.itheima.stock.Exception.BusinessException;
 import com.itheima.stock.mapper.SysPermissionMapper;
+import com.itheima.stock.mapper.SysRolePermissionMapper;
 import com.itheima.stock.pojo.entity.SysPermission;
 import com.itheima.stock.service.PermissionService;
+import com.itheima.stock.utils.IdWorker;
+import com.itheima.stock.vo.req.PermissionAddVo;
+import com.itheima.stock.vo.req.PermissionUpdateVo;
 import com.itheima.stock.vo.resp.LoginRespPermission;
+import com.itheima.stock.vo.resp.PermissionTreeNodeVo;
 import com.itheima.stock.vo.resp.R;
+import com.itheima.stock.vo.resp.ResponseCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,6 +38,10 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Autowired
     private SysPermissionMapper sysPermissionMapper;
+    @Autowired
+    private IdWorker idWorker;
+    @Autowired
+    private SysRolePermissionMapper sysRolePermissionMapper;
     /**
      * 根据用户id查询用户的所有权限
      * @param id 用户id
@@ -75,17 +91,199 @@ public class PermissionServiceImpl implements PermissionService {
         return list;
     }
 
+
+
     /**
      * 树状结构回显权限集合,递归获取权限数据集合
      * @return
      */
     @Override
-    public R<List<LoginRespPermission>> getAllPermission() {
+    public R<List<LoginRespPermission>> getPermissionTree() {
         //获取所有权限集合
        List<SysPermission> permissions = sysPermissionMapper.getAllPermission();
        //根据权限集合，遍历获取权限树
         List<LoginRespPermission> list = getTree(permissions, 0l, true);
         //响应数据
         return R.ok(list);
+    }
+
+    /**
+     * 获取所有权限的全部信息
+     * @return
+     */
+    @Override
+    public R<List<SysPermission>> getAllPermission() {
+        //调用mapper查询所有权限全部信息
+       List<SysPermission> all = sysPermissionMapper.findAll();
+       //判断集合是否为空
+        if (CollectionUtils.isEmpty(all)) {
+            throw new BusinessException(ResponseCode.ERROR.getMessage());
+        }
+        //响应参数
+        return R.ok(all);
+    }
+
+    /**
+     * 添加权限时回显权限树,仅仅显示目录和菜单
+     * @return
+     */
+    @Override
+    public R<List<PermissionTreeNodeVo>> getPermissionsTreeOnlyMeuns() {
+        //调用mapper获取所有权限的集合
+        List<SysPermission> permissions = sysPermissionMapper.findAll();
+        //构建权限树集合
+        List<PermissionTreeNodeVo> permissionTree = Lists.newArrayList();
+        //构架顶级菜单（默认选项）
+        PermissionTreeNodeVo root = new PermissionTreeNodeVo();
+        root.setId(0l);
+        root.setTitle("顶级菜单");
+        root.setLevel(0);
+        permissionTree.add(root);
+        permissionTree.addAll(getPermissionLevelTree(permissions,0l,1));
+        //响应数据
+        return R.ok(permissionTree);
+    }
+
+    /**
+     * 权限添加按钮
+     * @param vo
+     * @return
+     */
+    @Override
+    public R<String> addPermission(PermissionAddVo vo) {
+        //判断是否为空
+        if (vo==null){
+            throw new BusinessException(ResponseCode.DATA_ERROR.getMessage());
+        }
+        //将数据复制到pojo类中
+        SysPermission permission = new SysPermission();
+        BeanUtils.copyProperties(vo,permission);
+        //判断添加的权限类型是否合法
+        this.checkPermissionForm(permission);
+        //合法执行以下流程
+        permission.setId(idWorker.nextId());
+        permission.setCreateTime(new Date());
+        permission.setUpdateTime(new Date());
+        permission.setStatus(1);
+        permission.setDeleted(1);
+        //调用mapper添加到数据库
+        int row = sysPermissionMapper.insert(permission);
+        if (row!=1){
+            throw new BusinessException(ResponseCode.OPERATION_MENU_PERMISSION_CATALOG_ERROR.getMessage());
+        }
+        //响应数据
+        return R.ok(ResponseCode.SUCCESS.getMessage());
+    }
+
+
+    /**
+     * 修改权限按钮
+     * @param vo
+     * @return
+     */
+    @Override
+    public R<String> updatePermission(PermissionUpdateVo vo) {
+        //检查当前提交数据是否合法,如果不合法，则抛出异常
+        SysPermission permission = new SysPermission();
+        BeanUtils.copyProperties(vo,permission);
+        this.checkPermissionForm(permission);
+        //TODO 如果再更新时，父级已被修改，则排除异常
+        permission.setStatus(1);
+        permission.setUpdateTime(new Date());
+        permission.setDeleted(1);
+        int count = this.sysPermissionMapper.updateByPrimaryKeySelective(permission);
+        if (count!=1) {
+            throw new BusinessException(ResponseCode.ERROR.getMessage());
+        }
+        return R.ok(ResponseCode.SUCCESS.getMessage());
+    }
+
+
+    /**
+     * 删除权限按钮菜单
+     * @param permissionId
+     * @return
+     */
+    @Override
+    public R<String> deletePermission(Long permissionId) {
+        //判断是否有子集，有就不能删除
+      int row = sysPermissionMapper.findChildrenCountByParentId(permissionId);
+        if (row > 0) {
+            throw new BusinessException(ResponseCode.ROLE_PERMISSION_RELATION.getMessage());
+        }
+        //删除角色权限表中对应的数据
+        sysRolePermissionMapper.deleteByPermissionId(permissionId);
+        //逻辑删除，将deleted改为0即可
+        SysPermission permission = SysPermission.builder()
+                .id(permissionId)
+                .deleted(0)
+                .updateTime(new Date())
+                .build();
+        int updateCount = this.sysPermissionMapper.updateByPrimaryKeySelective(permission);
+        if (updateCount!=1) {
+            throw new BusinessException(ResponseCode.ERROR.getMessage());
+        }
+        //响应数据
+        return R.ok(ResponseCode.SUCCESS.getMessage());
+    }
+
+
+    /**
+     * 递归设置级别，用于权限列表 添加/编辑 所属菜单树结构数据
+     * @param permissions 权限集合
+     * @param parentId 父级id
+     * @param lavel 级别
+     * @return
+     */
+    private List<PermissionTreeNodeVo> getPermissionLevelTree(List<SysPermission> permissions, long parentId, int lavel) {
+        List<PermissionTreeNodeVo> result=new ArrayList<>();
+        for (SysPermission permission : permissions) {
+            if (permission.getType().intValue()!=3 && permission.getPid().equals(parentId)) {
+                PermissionTreeNodeVo nodeTreeVo = new PermissionTreeNodeVo();
+                nodeTreeVo.setId(permission.getId());
+                nodeTreeVo.setTitle(permission.getTitle());
+                nodeTreeVo.setLevel(lavel);
+                result.add(nodeTreeVo);
+                result.addAll(getPermissionLevelTree(permissions,permission.getId(),lavel+1));
+            }
+        }
+        return result;
+    }
+
+    private void checkPermissionForm(SysPermission vo) {
+        if (vo!=null || vo.getType()!=null || vo.getPid()!=null){
+            //获取权限类型 0：顶级目录 1.普通目录 2.菜单 3.按钮
+            Integer type = vo.getType();
+            //获取父级id
+            Long pid = vo.getPid();
+            //根据父级id查询父级信息
+            SysPermission parentPermission = this.sysPermissionMapper.selectByPrimaryKey(pid);
+            if (type==1){
+                if(!(pid == 0l) || (parentPermission!=null && parentPermission.getType()> 1)){
+                    throw new BusinessException(ResponseCode.OPERATION_MENU_PERMISSION_CATALOG_ERROR.getMessage());
+                }
+            }
+            else if (type==2){
+                if (parentPermission==null || parentPermission.getType() !=1 ){
+                    throw new BusinessException(ResponseCode.OPERATION_MENU_PERMISSION_CATALOG_ERROR.getMessage());
+                }
+                if (StringUtils.isBlank(vo.getUrl())){
+                    throw new BusinessException(ResponseCode.OPERATION_MENU_PERMISSION_URL_CODE_NULL.getMessage());
+                }
+            }
+            else if (type==3){
+                if (parentPermission==null || parentPermission.getType()!=2){
+                    throw new BusinessException(ResponseCode.OPERATION_MENU_PERMISSION_BTN_ERROR.getMessage());
+                }
+                else if (vo.getUrl()==null || vo.getCode()==null || vo.getMethod()==null){
+                    throw new BusinessException(ResponseCode.DATA_ERROR.getMessage());
+                }
+            }
+            else {
+                throw new BusinessException(ResponseCode.DATA_ERROR.getMessage());
+            }
+        }else {
+            throw new BusinessException(ResponseCode.DATA_ERROR.getMessage());
+        }
     }
 }

@@ -2,13 +2,21 @@ package com.itheima.stock.pojo.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 权限表（菜单）
  * @TableName sys_permission
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+
 public class SysPermission implements Serializable {
     /**
      * 主键

@@ -37,4 +37,17 @@ public interface SysPermissionMapper {
      * @return
      */
     List<SysPermission> getAllPermission();
+
+    /**
+     * 查询所有的权限集合
+     * @return
+     */
+    List<SysPermission> findAll();
+
+    /**
+     * 根据权限父类id查询对应子集权限
+     * @param permissionId
+     * @return
+     */
+    int findChildrenCountByParentId(Long permissionId);
 }
