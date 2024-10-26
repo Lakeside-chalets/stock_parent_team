@@ -31,7 +31,7 @@ public class StockJob {
      * 建议针对不同的股票数据，定义不同的采集任务，解耦，方便维护
      */
     @XxlJob("getInnerMarketInfo")
-    public void getStockInfos(){
+    public void getStockInfos()throws Exception{
         stockTimerTaskService.getInnerMarketInfo();
     }
 
@@ -39,14 +39,14 @@ public class StockJob {
      * 定时采集A股个股数据
      */
     @XxlJob("getStockRtIndex")
-    public void getStockRtIndex(){
+    public void getStockRtIndex()throws Exception{
         stockTimerTaskService.getStockRtIndex();
     }
     /**
      * 板块定时任务
      */
     @XxlJob("getStockBlockRtIndex")
-    public void getStockBlockRtIndex(){
+    public void getStockBlockRtIndex()throws Exception{
         stockTimerTaskService.getStockBlockRtIndex();
     }
 
@@ -54,7 +54,7 @@ public class StockJob {
      * 定时采集国外大盘数据
      */
     @XxlJob("getStockOuterMarketInfo")
-    public void getStockOuterMarketInfo(){
+    public void getStockOuterMarketInfo()throws Exception{
         stockTimerTaskService.getStockOuterMarketInfo();
     }
 }
