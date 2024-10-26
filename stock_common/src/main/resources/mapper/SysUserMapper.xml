@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.itheima.stock.mapper.SysUserMapper">
+<mapper namespace="com.zit.stock.mapper.SysUserMapper">
 
-    <resultMap id="BaseResultMap" type="com.itheima.stock.pojo.entity.SysUser">
+    <resultMap id="BaseResultMap" type="com.zit.stock.pojo.entity.SysUser">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="username" column="username" jdbcType="VARCHAR"/>
             <result property="password" column="password" jdbcType="VARCHAR"/>
@@ -44,7 +44,7 @@
         from sys_user
         where   username= #{name}
     </select>
-    <select id="findUserAllInfoByPage" resultType="com.itheima.stock.pojo.domain.UserPageListInfoDomain">
+    <select id="findUserAllInfoByPage" resultType="com.zit.stock.pojo.domain.UserPageListInfoDomain">
         SELECT
         u1.*,
         u2.username AS createUserName,
@@ -78,7 +78,7 @@
         where  username = #{userName}
     </delete>
 
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.itheima.stock.pojo.entity.SysUser" useGeneratedKeys="true">
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.zit.stock.pojo.entity.SysUser" useGeneratedKeys="true">
         insert into sys_user
 
         ( id,username,password
@@ -94,7 +94,7 @@
         ,#{createWhere,jdbcType=TINYINT},#{createTime,jdbcType=TIMESTAMP},#{updateTime,jdbcType=TIMESTAMP}
         )
     </insert>
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.itheima.stock.pojo.entity.SysUser" useGeneratedKeys="true">
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.zit.stock.pojo.entity.SysUser" useGeneratedKeys="true">
         insert into sys_user
         <trim prefix="(" suffix=")" suffixOverrides=",">
                 <if test="id != null">id,</if>
@@ -131,7 +131,7 @@
                 <if test="updateTime != null">#{updateTime,jdbcType=TIMESTAMP},</if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.itheima.stock.pojo.entity.SysUser">
+    <update id="updateByPrimaryKeySelective" parameterType="com.zit.stock.pojo.entity.SysUser">
         update sys_user
         <set>
                 <if test="username != null">
@@ -179,7 +179,7 @@
         </set>
         where   id = #{id,jdbcType=BIGINT} 
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.itheima.stock.pojo.entity.SysUser">
+    <update id="updateByPrimaryKey" parameterType="com.zit.stock.pojo.entity.SysUser">
         update sys_user
         <set>
             <if test="username != null">

@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.itheima.stock.mapper.StockOuterMarketIndexInfoMapper">
+<mapper namespace="com.zit.stock.mapper.StockOuterMarketIndexInfoMapper">
 
-    <resultMap id="BaseResultMap" type="com.itheima.stock.pojo.entity.StockOuterMarketIndexInfo">
+    <resultMap id="BaseResultMap" type="com.zit.stock.pojo.entity.StockOuterMarketIndexInfo">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="marketCode" column="market_code" jdbcType="CHAR"/>
             <result property="marketName" column="market_name" jdbcType="VARCHAR"/>
@@ -26,7 +26,7 @@
         from stock_outer_market_index_info
         where  id = #{id,jdbcType=BIGINT} 
     </select>
-    <select id="getOutMarketInfo" resultType="com.itheima.stock.pojo.domain.OuterMarketDomain">
+    <select id="getOutMarketInfo" resultType="com.zit.stock.pojo.domain.OuterMarketDomain">
         select date_format(cur_time, '%Y%m%d') as curTime,
                market_name                     as name,
                cur_point                       as curPoint,
@@ -45,7 +45,7 @@
         delete from stock_outer_market_index_info
         where  id = #{id,jdbcType=BIGINT} 
     </delete>
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.itheima.stock.pojo.entity.StockOuterMarketIndexInfo" useGeneratedKeys="true">
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.zit.stock.pojo.entity.StockOuterMarketIndexInfo" useGeneratedKeys="true">
         insert into stock_outer_market_index_info
         ( id,market_code,market_name
         ,cur_point,updown,rose
@@ -54,7 +54,7 @@
         ,#{curPoint,jdbcType=DECIMAL},#{updown,jdbcType=DECIMAL},#{rose,jdbcType=DECIMAL}
         ,#{curTime,jdbcType=TIMESTAMP})
     </insert>
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.itheima.stock.pojo.entity.StockOuterMarketIndexInfo" useGeneratedKeys="true">
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.zit.stock.pojo.entity.StockOuterMarketIndexInfo" useGeneratedKeys="true">
         insert into stock_outer_market_index_info
         <trim prefix="(" suffix=")" suffixOverrides=",">
                 <if test="id != null">id,</if>
@@ -86,7 +86,7 @@
                ,#{info.curTime,jdbcType=TIMESTAMP})
     </foreach>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.itheima.stock.pojo.entity.StockOuterMarketIndexInfo">
+    <update id="updateByPrimaryKeySelective" parameterType="com.zit.stock.pojo.entity.StockOuterMarketIndexInfo">
         update stock_outer_market_index_info
         <set>
                 <if test="marketCode != null">
@@ -110,7 +110,7 @@
         </set>
         where   id = #{id,jdbcType=BIGINT} 
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.itheima.stock.pojo.entity.StockOuterMarketIndexInfo">
+    <update id="updateByPrimaryKey" parameterType="com.zit.stock.pojo.entity.StockOuterMarketIndexInfo">
         update stock_outer_market_index_info
         set 
             market_code =  #{marketCode,jdbcType=CHAR},

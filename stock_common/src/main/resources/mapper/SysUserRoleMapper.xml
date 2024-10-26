@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.itheima.stock.mapper.SysUserRoleMapper">
+<mapper namespace="com.zit.stock.mapper.SysUserRoleMapper">
 
-    <resultMap id="BaseResultMap" type="com.itheima.stock.pojo.entity.SysUserRole">
+    <resultMap id="BaseResultMap" type="com.zit.stock.pojo.entity.SysUserRole">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="userId" column="user_id" jdbcType="BIGINT"/>
             <result property="roleId" column="role_id" jdbcType="BIGINT"/>
@@ -30,14 +30,14 @@
     <delete id="deleteByUserId">
         delete from sys_user_role where user_id = #{userId}
     </delete>
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.itheima.stock.pojo.entity.SysUserRole" useGeneratedKeys="true">
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.zit.stock.pojo.entity.SysUserRole" useGeneratedKeys="true">
         insert into sys_user_role
         ( id,user_id,role_id
         ,create_time)
         values (#{id,jdbcType=BIGINT},#{userId,jdbcType=BIGINT},#{roleId,jdbcType=BIGINT}
         ,#{createTime,jdbcType=TIMESTAMP})
     </insert>
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.itheima.stock.pojo.entity.SysUserRole" useGeneratedKeys="true">
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.zit.stock.pojo.entity.SysUserRole" useGeneratedKeys="true">
         insert into sys_user_role
         <trim prefix="(" suffix=")" suffixOverrides=",">
                 <if test="id != null">id,</if>
@@ -59,7 +59,7 @@
             ,#{item.createTime,jdbcType=TIMESTAMP})
         </foreach>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.itheima.stock.pojo.entity.SysUserRole">
+    <update id="updateByPrimaryKeySelective" parameterType="com.zit.stock.pojo.entity.SysUserRole">
         update sys_user_role
         <set>
                 <if test="userId != null">
@@ -74,7 +74,7 @@
         </set>
         where   id = #{id,jdbcType=BIGINT} 
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.itheima.stock.pojo.entity.SysUserRole">
+    <update id="updateByPrimaryKey" parameterType="com.zit.stock.pojo.entity.SysUserRole">
         update sys_user_role
         set 
             user_id =  #{userId,jdbcType=BIGINT},

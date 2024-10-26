@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.itheima.stock.mapper.StockBlockRtInfoMapper">
+<mapper namespace="com.zit.stock.mapper.StockBlockRtInfoMapper">
 
-    <resultMap id="BaseResultMap" type="com.itheima.stock.pojo.entity.StockBlockRtInfo">
+    <resultMap id="BaseResultMap" type="com.zit.stock.pojo.entity.StockBlockRtInfo">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="label" column="label" jdbcType="VARCHAR"/>
             <result property="blockName" column="block_name" jdbcType="VARCHAR"/>
@@ -29,7 +29,7 @@
         where  id = #{id,jdbcType=BIGINT} 
     </select>
 
-    <select id="getBlockInfo" resultType="com.itheima.stock.pojo.domain.StockBlockDomain">
+    <select id="getBlockInfo" resultType="com.zit.stock.pojo.domain.StockBlockDomain">
         SELECT
             sbr.company_num AS companyNum,
             sbr.trade_amount AS tradeAmt,
@@ -50,7 +50,7 @@
         delete from stock_block_rt_info
         where  id = #{id,jdbcType=BIGINT} 
     </delete>
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.itheima.stock.pojo.entity.StockBlockRtInfo" useGeneratedKeys="true">
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.zit.stock.pojo.entity.StockBlockRtInfo" useGeneratedKeys="true">
         insert into stock_block_rt_info
         ( id,label,block_name
         ,company_num,avg_price,updown_rate
@@ -61,7 +61,7 @@
         ,#{tradeAmount,jdbcType=BIGINT},#{tradeVolume,jdbcType=DECIMAL},#{curTime,jdbcType=TIMESTAMP}
         )
     </insert>
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.itheima.stock.pojo.entity.StockBlockRtInfo" useGeneratedKeys="true">
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.zit.stock.pojo.entity.StockBlockRtInfo" useGeneratedKeys="true">
         insert into stock_block_rt_info
         <trim prefix="(" suffix=")" suffixOverrides=",">
                 <if test="id != null">id,</if>
@@ -101,7 +101,7 @@
         </foreach>
     </insert>
 
-    <update id="updateByPrimaryKeySelective" parameterType="com.itheima.stock.pojo.entity.StockBlockRtInfo">
+    <update id="updateByPrimaryKeySelective" parameterType="com.zit.stock.pojo.entity.StockBlockRtInfo">
         update stock_block_rt_info
         <set>
                 <if test="label != null">
@@ -131,7 +131,7 @@
         </set>
         where   id = #{id,jdbcType=BIGINT} 
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.itheima.stock.pojo.entity.StockBlockRtInfo">
+    <update id="updateByPrimaryKey" parameterType="com.zit.stock.pojo.entity.StockBlockRtInfo">
         update stock_block_rt_info
         set 
             label =  #{label,jdbcType=VARCHAR},

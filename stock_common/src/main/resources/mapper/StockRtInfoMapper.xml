@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.itheima.stock.mapper.StockRtInfoMapper">
+<mapper namespace="com.zit.stock.mapper.StockRtInfoMapper">
 
-    <resultMap id="BaseResultMap" type="com.itheima.stock.pojo.entity.StockRtInfo">
+    <resultMap id="BaseResultMap" type="com.zit.stock.pojo.entity.StockRtInfo">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="stockCode" column="stock_code" jdbcType="CHAR"/>
             <result property="stockName" column="stock_name" jdbcType="VARCHAR"/>
@@ -31,7 +31,7 @@
         from stock_rt_info
         where  id = #{id,jdbcType=BIGINT} 
     </select>
-    <select id="getStockByTime" resultType="com.itheima.stock.pojo.domain.StockUpdownDomain">
+    <select id="getStockByTime" resultType="com.zit.stock.pojo.domain.StockUpdownDomain">
         select
             sri.trade_amount as tradeAmt,
             sri.pre_close_price as preClosePrice,
@@ -47,7 +47,7 @@
         where sri.cur_time=#{curDate}
         order by upDown desc
     </select>
-    <select id="getStockByTimeonBoard" resultType="com.itheima.stock.pojo.domain.StockUpdownDomain">
+    <select id="getStockByTimeonBoard" resultType="com.zit.stock.pojo.domain.StockUpdownDomain">
         select
             sri.trade_amount as tradeAmt,
             sri.pre_close_price as preClosePrice,
@@ -65,27 +65,27 @@
         limit 4
     </select>
     <select id="getUpDownCount" resultType="map">
-        SELECT
-            tmp.time,
-            COUNT(*) AS count
-        FROM
-            (SELECT
-            (cur_price - pre_close_price) / pre_close_price AS updown,
-            DATE_FORMAT(cur_time, '%Y%m%d%H%i') AS time
-            FROM
-            stock_rt_info
-            WHERE cur_time BETWEEN #{openDate}
-            AND #{endDate}
-            HAVING updown
-        <if test="flag == 1">
-            >= 0.1
+        select
+        date_format(tmp.time,'%Y%m%d%H%i') as time ,
+        count(*) as count
+        from (select
+        (sri.cur_price-sri.pre_close_price)/sri.pre_close_price as ud,
+        sri.cur_time as time
+        from stock_rt_info sri
+        where sri.cur_time BETWEEN #{openDate} and #{endDate}
+        having ud
+        <if test="flag==1">
+            >=0.1
         </if>
-        <if test="flag == 0">
-            &lt;= -0.1
+        <if test="flag==0">
+            &lt;=-0.1
         </if>
-          ) AS tmp
-        GROUP BY tmp.time
+        )
+        as tmp
+        group by tmp.time
+        order by tmp.time asc
     </select>
+
     <select id="getIncreaseRangeInfoByDate" resultType="map">
         <![CDATA[
         select tmp2.title ,count(*) as count from (select
@@ -107,7 +107,7 @@
         group by tmp2.title
         ]]>
     </select>
-    <select id="getStock4MinuteInfo" resultType="com.itheima.stock.pojo.domain.Stock4MinuteDomain">
+    <select id="getStock4MinuteInfo" resultType="com.zit.stock.pojo.domain.Stock4MinuteDomain">
         select
             sri.cur_time     as date,
 	sri.trade_amount as tradeAmt,
@@ -132,7 +132,7 @@
         where sri.stock_code=#{stockCode} and sri.cur_time between #{startDate} and #{endDate}
         group by date_format(sri.cur_time,'%Y%m%d')
     </select>
-    <select id="getStockByDayKlin" resultType="com.itheima.stock.pojo.domain.Stock4EvrDayDomain">
+    <select id="getStockByDayKlin" resultType="com.zit.stock.pojo.domain.Stock4EvrDayDomain">
         select
         sri2.cur_time     as date,
         sri2.trade_amount as tradeAmt,
@@ -151,13 +151,7 @@
         </foreach>
         order by sri2.cur_time;
     </select>
-    <select id="getInfobyFuzzySearch" resultType="java.util.Map">
-        select distinct
-            stock_name as name,
-            stock_code as code
-        from stock_rt_info
-        where stock_code like #{searchStrFuzzy}
-    </select>
+
     <select id="getStockByWeekline" resultType="java.util.Map">
         select
             avg(cur_price) as avgPrice,
@@ -175,43 +169,56 @@
         </foreach>
         group by min_price,open_price,max_price,cur_price,stock_code
     </select>
-    <select id="getstockScreenTimeSharingInfo" resultType="java.util.Map">
-        select
-            sri.trade_amount as tradeAmt,
-            sri.pre_close_price as preClosePrice,
-            sri.min_price as lowPrice,
-            sri.max_price as highPrice,
-            sri.open_price as openPrice,
-            sri.trade_volume as tradeVol,
-            sri.cur_price as tradePrice,
-            date_format(sri.cur_time,"%Y-%m-%d %H:%i") as curDate
-        from stock_rt_info as sri
-        where cur_time in (
-            select
-                max(sri2.cur_time)
-            from stock_rt_info as sri2
-            where sri2.stock_code = #{code}
-              and cur_time between #{startTime} and #{endTime}
-        )
-          and stock_code = #{code}
+
+
+    <select id="getstockTradingOnScreen" resultType="com.zit.stock.pojo.domain.StockNewTransactionDomain">
+        select cur_time as date,trade_amount as tradeAmt,trade_volume as tradeVol,cur_price as tradePrice
+        from stock_rt_info
+        where stock_code=#{code}
+        order by cur_time desc limit 10
     </select>
-    <select id="getstockTradingOnScreen" resultType="java.util.Map">
-        select
-            date_format(sri.cur_time, '%Y%m%d%H:%m') as date,
-            sri.trade_amount as tradeAmt,
-            sri.trade_volume as tradeVol,
-            sri.cur_price as tradePrice
-        from stock_rt_info as sri
-        where sri.stock_code = #{code}
-        order by cur_time desc
-            limit 10
+    <select id="getStockNewPriceByCode" resultType="com.zit.stock.pojo.domain.StockNewPriceDomain">
+        select trade_amount as tradeAmt,pre_close_price as preClosePrice,
+               min_price as lowPrice,max_price as highPrice,open_price as openPrice,
+               trade_volume as tradeVol,cur_price as tradePrice,cur_time as curDate
+        from stock_rt_info
+        where stock_code=#{code} and cur_time=#{endTime}
+    </select>
+    <select id="getStockWeekKLineByCode" resultType="com.zit.stock.pojo.domain.Stock4EveryWeekDomain">
+        SELECT
+            stock_code AS stockCode,
+            MAX( cur_time ) AS mxTime,
+            MIN( cur_time ) AS miTime,
+            MAX( cur_price ) AS maxPrice,
+            MIN( cur_price ) AS minPrice,
+            AVG( cur_price ) AS avgPrice
+        FROM
+            stock_rt_info
+        WHERE
+            stock_code = #{code}
+          AND cur_time BETWEEN #{startDate} AND #{endDate}
+        GROUP BY
+            DATE_FORMAT( cur_time, '%Y-%u')
+        ORDER BY
+            mxTime ASC
+    </select>
+    <select id="getStockInfoByCodeAndTimes" resultType="java.math.BigDecimal">
+        SELECT
+        sri.cur_price
+        FROM stock_rt_info AS sri
+        WHERE sri.stock_code=#{code} AND sri.cur_time in
+        <foreach collection="times" item="timePoint" separator="," open="(" close=")">
+            #{timePoint}
+        </foreach>
+        ORDER BY
+        sri.cur_time ASC
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from stock_rt_info
         where  id = #{id,jdbcType=BIGINT} 
     </delete>
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.itheima.stock.pojo.entity.StockRtInfo" useGeneratedKeys="true">
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.zit.stock.pojo.entity.StockRtInfo" useGeneratedKeys="true">
         insert into stock_rt_info
         ( id,stock_code,stock_name
         ,pre_close_price,open_price,cur_price
@@ -237,7 +244,7 @@
                </foreach>
 
     </insert>
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.itheima.stock.pojo.entity.StockRtInfo" useGeneratedKeys="true">
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.zit.stock.pojo.entity.StockRtInfo" useGeneratedKeys="true">
         insert into stock_rt_info
         <trim prefix="(" suffix=")" suffixOverrides=",">
                 <if test="id != null">id,</if>
@@ -266,7 +273,7 @@
                 <if test="curTime != null">#{curTime,jdbcType=TIMESTAMP},</if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.itheima.stock.pojo.entity.StockRtInfo">
+    <update id="updateByPrimaryKeySelective" parameterType="com.zit.stock.pojo.entity.StockRtInfo">
         update stock_rt_info
         <set>
                 <if test="stockCode != null">
@@ -302,7 +309,7 @@
         </set>
         where   id = #{id,jdbcType=BIGINT} 
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.itheima.stock.pojo.entity.StockRtInfo">
+    <update id="updateByPrimaryKey" parameterType="com.zit.stock.pojo.entity.StockRtInfo">
         update stock_rt_info
         set 
             stock_code =  #{stockCode,jdbcType=CHAR},

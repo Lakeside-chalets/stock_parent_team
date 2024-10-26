@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.itheima.stock.mapper.StockBusinessMapper">
+<mapper namespace="com.zit.stock.mapper.StockBusinessMapper">
 
-    <resultMap id="BaseResultMap" type="com.itheima.stock.pojo.entity.StockBusiness">
+    <resultMap id="BaseResultMap" type="com.zit.stock.pojo.entity.StockBusiness">
             <id property="stockCode" column="stock_code" jdbcType="CHAR"/>
             <result property="stockName" column="stock_name" jdbcType="VARCHAR"/>
             <result property="blockLabel" column="block_label" jdbcType="VARCHAR"/>
@@ -24,26 +24,25 @@
         from stock_business
         where  stock_code = #{stockCode,jdbcType=CHAR} 
     </select>
-    <select id="getAllStockCode" resultType="string">
+    <select id="getAllStockCode" resultType="java.lang.String">
         select stock_code from stock_business
     </select>
-    <select id="getBusinessInfoByCode" resultType="map">
-        select
-            stock_code as code,
-            block_name as trade,
-            business as business,
-            stock_name as name
-        from
-            stock_business
-        where stock_code = #{code} ;
-
+    <select id="getBusinessInfoByCode" resultType="com.zit.stock.pojo.domain.StockBusinessDomain">
+        select stock_code as code,block_name as trade,business,stock_name as name
+        from stock_business
+        where stock_code = #{code}
+    </select>
+    <select id="getStockNameAndCodeByStr" resultType="java.util.Map">
+        select stock_code as code,stock_name as name from stock_business
+        where stock_code like concat('%',#{searchStr},'%')
     </select>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+
+    <delete id="deleteByPrimaryKey" parameterType="string">
         delete from stock_business
         where  stock_code = #{stockCode,jdbcType=CHAR} 
     </delete>
-    <insert id="insert" keyColumn="stock_code" keyProperty="stockCode" parameterType="com.itheima.stock.pojo.entity.StockBusiness" useGeneratedKeys="true">
+    <insert id="insert" keyColumn="stock_code" keyProperty="stockCode" parameterType="com.zit.stock.pojo.entity.StockBusiness" useGeneratedKeys="true">
         insert into stock_business
         ( stock_code,stock_name,block_label
         ,block_name,business,update_time
@@ -52,7 +51,7 @@
         ,#{blockName,jdbcType=VARCHAR},#{business,jdbcType=VARCHAR},#{updateTime,jdbcType=TIMESTAMP}
         )
     </insert>
-    <insert id="insertSelective" keyColumn="stock_code" keyProperty="stockCode" parameterType="com.itheima.stock.pojo.entity.StockBusiness" useGeneratedKeys="true">
+    <insert id="insertSelective" keyColumn="stock_code" keyProperty="stockCode" parameterType="com.zit.stock.pojo.entity.StockBusiness" useGeneratedKeys="true">
         insert into stock_business
         <trim prefix="(" suffix=")" suffixOverrides=",">
                 <if test="stockCode != null">stock_code,</if>
@@ -71,7 +70,7 @@
                 <if test="updateTime != null">#{updateTime,jdbcType=TIMESTAMP},</if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.itheima.stock.pojo.entity.StockBusiness">
+    <update id="updateByPrimaryKeySelective" parameterType="com.zit.stock.pojo.entity.StockBusiness">
         update stock_business
         <set>
                 <if test="stockName != null">
@@ -92,7 +91,7 @@
         </set>
         where   stock_code = #{stockCode,jdbcType=CHAR} 
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.itheima.stock.pojo.entity.StockBusiness">
+    <update id="updateByPrimaryKey" parameterType="com.zit.stock.pojo.entity.StockBusiness">
         update stock_business
         set 
             stock_name =  #{stockName,jdbcType=VARCHAR},

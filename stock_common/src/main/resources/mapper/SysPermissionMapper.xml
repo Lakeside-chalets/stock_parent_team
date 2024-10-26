@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.itheima.stock.mapper.SysPermissionMapper">
+<mapper namespace="com.zit.stock.mapper.SysPermissionMapper">
 
-    <resultMap id="BaseResultMap" type="com.itheima.stock.pojo.entity.SysPermission">
+    <resultMap id="BaseResultMap" type="com.zit.stock.pojo.entity.SysPermission">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="code" column="code" jdbcType="VARCHAR"/>
             <result property="title" column="title" jdbcType="VARCHAR"/>
@@ -37,17 +37,17 @@
         where  id = #{id,jdbcType=BIGINT} 
     </select>
 
-    <select id="findPermissionsByUserId" resultType="com.itheima.stock.pojo.entity.SysPermission">
+    <select id="findPermissionsByUserId" resultType="com.zit.stock.pojo.entity.SysPermission">
         select p.*
         from sys_permission as p,sys_role_permission as rp,sys_user_role as ur
         where p.id=rp.permission_id and rp.role_id = ur.role_id and ur.user_id=#{id}
     </select>
-    <select id="getAllPermission" resultType="com.itheima.stock.pojo.entity.SysPermission">
+    <select id="getAllPermission" resultType="com.zit.stock.pojo.entity.SysPermission">
         select
         <include refid="Base_Column_List" />
         from sys_permission where deleted=1
     </select>
-    <select id="findAll" resultType="com.itheima.stock.pojo.entity.SysPermission">
+    <select id="findAll" resultType="com.zit.stock.pojo.entity.SysPermission">
         select
         <include refid="Base_Column_List" />
         from sys_permission where deleted=1
@@ -60,7 +60,7 @@
         delete from sys_permission
         where  id = #{id,jdbcType=BIGINT} 
     </delete>
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.itheima.stock.pojo.entity.SysPermission" useGeneratedKeys="true">
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.zit.stock.pojo.entity.SysPermission" useGeneratedKeys="true">
         insert into sys_permission
         ( id,code,title
         ,icon,perms,url
@@ -75,7 +75,7 @@
         ,#{createTime,jdbcType=TIMESTAMP},#{updateTime,jdbcType=TIMESTAMP},#{deleted,jdbcType=TINYINT}
         )
     </insert>
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.itheima.stock.pojo.entity.SysPermission" useGeneratedKeys="true">
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.zit.stock.pojo.entity.SysPermission" useGeneratedKeys="true">
         insert into sys_permission
         <trim prefix="(" suffix=")" suffixOverrides=",">
                 <if test="id != null">id,</if>
@@ -112,7 +112,7 @@
                 <if test="deleted != null">#{deleted,jdbcType=TINYINT},</if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.itheima.stock.pojo.entity.SysPermission">
+    <update id="updateByPrimaryKeySelective" parameterType="com.zit.stock.pojo.entity.SysPermission">
         update sys_permission
         <set>
                 <if test="code != null">
@@ -160,7 +160,7 @@
         </set>
         where   id = #{id,jdbcType=BIGINT} 
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.itheima.stock.pojo.entity.SysPermission">
+    <update id="updateByPrimaryKey" parameterType="com.zit.stock.pojo.entity.SysPermission">
         update sys_permission
         set 
             code =  #{code,jdbcType=VARCHAR},

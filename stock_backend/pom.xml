@@ -64,14 +64,33 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.security</groupId>-->
+<!--            <artifactId>spring-security-core</artifactId>-->
+<!--            <version>5.7.6</version>-->
+<!--        </dependency>-->
+        <!--引入security-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <!--打包名称-->
-        <finalName>${project.artifactId}</finalName>
+<!--        <finalName>${project.artifactId}</finalName>-->
+        <finalName>app</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!--jar包保存位置-->
+                    <outputDirectory>../docker/backend</outputDirectory>
+                </configuration>
             </plugin>
         </plugins>
     </build>
