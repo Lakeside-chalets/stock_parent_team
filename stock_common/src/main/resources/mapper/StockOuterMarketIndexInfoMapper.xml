@@ -27,7 +27,7 @@
         where  id = #{id,jdbcType=BIGINT} 
     </select>
     <select id="getOutMarketInfo" resultType="com.zit.stock.pojo.domain.OuterMarketDomain">
-        select date_format(cur_time, '%Y%m%d') as curTime,
+        select cur_time                        as curTime,
                market_name                     as name,
                cur_point                       as curPoint,
                updown                          as upDown,
@@ -39,6 +39,13 @@
             #{outcode}
         </foreach>
         order by cur_time, cur_point desc limit 4
+    </select>
+    <select id="getOutMarketInfoByDate" resultType="com.zit.stock.pojo.domain.OuterMarketDomain">
+        select market_name as name,cur_point as curPoint,
+               updown as upDown,rose,
+               cur_time as curTime
+        from stock_outer_market_index_info
+        order by curTime desc,curPoint desc limit 5;
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">

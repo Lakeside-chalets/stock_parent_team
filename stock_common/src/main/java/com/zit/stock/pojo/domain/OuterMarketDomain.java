@@ -1,5 +1,6 @@
 package com.zit.stock.pojo.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -46,5 +47,6 @@ public class OuterMarketDomain {
      * 当前时间
      */
      @ApiModelProperty(value = "当前时间", position = 5)
+     @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "Asia/Shanghai")
      private Date curTime;
 }

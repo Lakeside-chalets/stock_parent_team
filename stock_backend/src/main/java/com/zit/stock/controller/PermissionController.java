@@ -1,5 +1,6 @@
 package com.zit.stock.controller;
 
+import com.zit.stock.log.annotation.StockLog;
 import com.zit.stock.pojo.entity.SysPermission;
 import com.zit.stock.service.PermissionService;
 import com.zit.stock.vo.req.PermissionAddVo;
@@ -12,6 +13,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -64,11 +66,13 @@ public class PermissionController {
      * @param vo
      * @return
      */
+    @StockLog("组织管理-菜单权限管理-添加权限按钮")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "body", dataType = "PermissionAddVo", name = "vo", value = "", required = true)
     })
     @ApiOperation(value = "权限添加按钮", notes = "权限添加按钮", httpMethod = "POST")
     @PostMapping("/permission")
+    @PreAuthorize("hasAuthority('sys:permission:add')")//权限表示与数据库定义的标识一致
     public R<String> addPermission (@RequestBody PermissionAddVo vo){
         return permissionService.addPermission(vo);
     }
@@ -78,11 +82,13 @@ public class PermissionController {
      * @param vo
      * @return
      */
+    @StockLog("组织管理-菜单权限管理-更新权限按钮")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "body", dataType = "PermissionUpdateVo", name = "vo", value = "", required = true)
     })
     @ApiOperation(value = "更新修改权限按钮", notes = "更新修改权限按钮", httpMethod = "PUT")
     @PutMapping("/permission")
+    @PreAuthorize("hasAuthority('sys:permission:update')")//权限表示与数据库定义的标识一致
     public R<String> updatePermission(@RequestBody PermissionUpdateVo vo){
         return permissionService.updatePermission(vo);
     }
@@ -92,11 +98,13 @@ public class PermissionController {
      * @param permissionId
      * @return
      */
+    @StockLog("组织管理-菜单权限管理-删除权限按钮")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "path", dataType = "long", name = "permissionId", value = "", required = true)
     })
     @ApiOperation(value = "删除权限按钮菜单", notes = "删除权限按钮菜单", httpMethod = "DELETE")
     @DeleteMapping("/permission/{permissionId}")
+    @PreAuthorize("hasAuthority('sys:permission:delete')")//权限表示与数据库定义的标识一致
     public R<String> deletePermission(@PathVariable("permissionId") Long permissionId){
     return permissionService.deletePermission(permissionId);
     }

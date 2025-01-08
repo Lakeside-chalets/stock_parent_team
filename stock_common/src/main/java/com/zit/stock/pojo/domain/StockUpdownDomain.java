@@ -84,6 +84,6 @@ public class StockUpdownDomain {
     @ApiModelProperty(value = "当前日期", position = 10)
     @ExcelProperty(value = {"股票涨幅信息统计表","日期"},index = 9)
     @DateTimeFormat("yyy-MM-dd HH:mm")//easyExcel的注解-》excel
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")//springmvc支持的注解-》json格式数据
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm" ,timezone = "Asia/Shanghai")//springmvc支持的注解-》json格式数据
     private Date curDate;
 }

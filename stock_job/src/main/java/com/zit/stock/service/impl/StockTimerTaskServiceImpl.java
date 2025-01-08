@@ -168,7 +168,7 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
         if (count > 0) {
             //大盘采集完毕后，通知backend工程刷新缓存
             //发送日期对象，接收方通过接收的日期与当前日期对比，能判断出数据延迟的时常问题
-            rabbitTemplate.convertAndSend("stockExchange", "inner.market", new Date());
+            rabbitTemplate.convertAndSend("stockExchange", "inner.mar", new Date());
             log.info("当前时间点:{},插入大盘数据:{}成功", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), entities);
         } else {
             log.info("当前时间点:{},插入大盘数据:{}失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), entities);
@@ -186,7 +186,8 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
 //        //
 //        添加大盘前缀 sh sz
 //        allStockCode = allStockCode.stream().map(code -> code.startsWith("6") ? "sh" + code : "sz" + code).collect(Collectors.toList());
-////        System.out.println(allStockCode);
+//        System.out.println(allStockCode);
+
         //通过缓存获取数据，（第一次还是从数据库获取）
         List<String> allStockCode = stockCacheFace.getAllStockCodeWithPredix();
         //将所有股票编码组成的大的集合拆分成若干个小的集合
@@ -234,6 +235,9 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
                 //批量保存数据
                 int count = stockRtInfoMapper.insertBatch(list);
                 if (count > 0) {
+                    //个股采集完毕后，通知backend工程刷新缓存
+                    //发送日期对象，接收方通过接收的日期与当前日期对比，能判断出数据延迟的时常问题
+                    rabbitTemplate.convertAndSend("stockExchange", "Stock.rtInfo", new Date());
                     log.info("当前时间点:{},插入个股数据:{}成功", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), list);
                 } else {
                     log.info("当前时间点:{},插入个股数据:{}失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), list);
@@ -256,7 +260,16 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
         //数据分片保存到数据库下 行业板块类目大概50个，可每小时查询一 次即可
         Lists.partition(infos, 20).forEach(list -> {
             //20个一组，批量插入
-            stockBlockRtInfoMapper.insertBatch(list);
+            int count = stockBlockRtInfoMapper.insertBatch(list);
+            if (count>0) {
+                //板块采集完毕后，通知backend工程刷新缓存
+                //发送日期对象，接收方通过接收的日期与当前日期对比，能判断出数据延迟的时常问题
+                rabbitTemplate.convertAndSend("stockExchange", "Stock.Block", new Date());
+                log.info("当前时间点:{},插入板块数据:{}成功", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), list);
+            } else {
+                log.info("当前时间点:{},插入板块数据:{}失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), list);
+            }
+
         });
     }
 
@@ -348,6 +361,9 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
         //将调用mapper接口数据保存到数据库中  //批量插入
         int row = stockOuterMarketIndexInfoMapper.insertBatch(list);
         if (row>0) {
+            //外盘采集完毕后，通知backend工程刷新缓存
+            //发送日期对象，接收方通过接收的日期与当前日期对比，能判断出数据延迟的时常问题
+            rabbitTemplate.convertAndSend("stockExchange", "outer.market", new Date());
             log.info("当前时间点:{},插入国外大盘数据:{}成功",DateTime.now().toString("yyyy-MM-dd HH:mm:ss"),list);
         }else {
             log.info("当前时间点:{},插入国外大盘数据:{}失败",DateTime.now().toString("yyyy-MM-dd HH:mm:ss"),list);

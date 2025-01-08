@@ -1,26 +1,27 @@
-package com.zit.stock.vo.resp;
+package com.zit.stock.vo.req;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @ClassName: UserInfoRespVo
- * @Description: TODO
+ * @ClassName: LoginReqVo
+ * @Description: 注册请求参数
  * @Author: mianbaoren
- * @Date: 2024/10/1 15:52
+ * @Date: 2024/8/29 14:18
  */
 @Data
-public class UserInfoRespVo {
-    /**
-     * 用户id
-     */
-    private Long id;
+@ApiModel
+public class RegisterReqVo {
     /**
      * 用户名
      */
+    @ApiModelProperty(value = "用户名")
     private String username;
     /**
      * 密码
      */
+    @ApiModelProperty(value = "明文密码")
     private String password;
     /**
      *电话
@@ -42,9 +43,8 @@ public class UserInfoRespVo {
      * 性别1表示男，0表示女
      */
     private Integer sex;
-    /**
-     * 用户状态，1表示正常，2表示锁定
-     */
-    private Integer status;
+
+
+
 
 }

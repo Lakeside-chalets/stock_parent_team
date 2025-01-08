@@ -87,4 +87,25 @@ public interface UserService {
      * @return
      */
     R<String> updateUserInfo(@Param("vo") UserUpdateInfoVo vo);
+
+    /**
+     * 用户注册
+     * @param vo
+     * @return
+     */
+    R<String> userRegister(RegisterReqVo vo);
+
+    /**
+     * 修改个人密码
+     * @param vo
+     * @return
+     */
+    R<String> updatePassword(UserUpdatePassword vo);
+
+    /**
+     * 重置用户密码
+     * @param id
+     * @return
+     */
+    R<String> ResetPassword(Long id);
 }

@@ -24,10 +24,13 @@ spring:
       matching-strategy: ant_path_matcher  #springboot路径匹配
   main:
     allow-bean-definition-overriding: true # 配置允许容器中的bean资源被覆盖
+#  jackson:
+#    date-format: yyyy-MM-dd HH:mm #格式化时区
+#    time-zone: GMT+8
 
 # mybatis配置
 mybatis:
-  type-aliases-package: com.itheima.stock.pojo #批量给实体类起别名，方便xml中直接使用别名，避免冗余配置
+  type-aliases-package: com.zit.stock.pojo #批量给实体类起别名，方便xml中直接使用别名，避免冗余配置
   mapper-locations: classpath:mapper/*.xml #配置加载mapperxml资源
   configuration:
     map-underscore-to-camel-case: true # 开启驼峰映射

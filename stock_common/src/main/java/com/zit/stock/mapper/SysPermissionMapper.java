@@ -50,4 +50,19 @@ public interface SysPermissionMapper {
      * @return
      */
     int findChildrenCountByParentId(Long permissionId);
+
+    /**
+     * 获取父亲权限的所有子权限id号
+     * @param permissionId
+     * @return
+     */
+    List<Long>  findChildren(Long permissionId);
+
+
+    /**
+     * 判断是否是目录，如果是目录则跳过循环
+     * @param permissionId
+     * @return
+     */
+    Boolean checkIsMenu(@Param("permissionId") Long permissionId);
 }

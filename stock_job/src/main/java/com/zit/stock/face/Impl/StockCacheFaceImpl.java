@@ -26,7 +26,9 @@ public class StockCacheFaceImpl implements StockCacheFace {
         //1.获取所有个股的集合 3000+
         List<String> allStockCode = stockBusinessMapper.getAllStockCode();
         //添加大盘前缀 sh sz
-        allStockCode = allStockCode.stream().map(code -> code.startsWith("6") ? "sh" + code : "sz" + code).collect(Collectors.toList());
+        allStockCode = allStockCode.stream().map(code -> code
+                        .startsWith("6") ? "sh" + code : "sz" + code)
+                        .collect(Collectors.toList());
         return allStockCode;
     }
 }

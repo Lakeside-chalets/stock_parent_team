@@ -345,6 +345,7 @@ public class UserServiceImpl implements UserService {
         UserInfoRespVo userInfoRespVo = new UserInfoRespVo();
         //将信息复制到个人资料里面
         BeanUtils.copyProperties(sysUser,userInfoRespVo);
+        userInfoRespVo.setPassword("*********");
         //响应数据
         return R.ok(userInfoRespVo);
     }
@@ -369,5 +370,103 @@ public class UserServiceImpl implements UserService {
         //响应数据
         return R.ok(ResponseCode.SUCCESS.getMessage());
     }
+
+    /**
+     * 添加用户
+     * @param vo 请求参数
+     * @return
+     */
+    @Override
+    public R<String> userRegister(RegisterReqVo vo) {
+        //判断用户是否存在
+        SysUser sysUser = sysUserMapper.findByUserName(vo.getUsername());
+        if (sysUser != null) {
+            return R.error(ResponseCode.ACCOUNT_EXISTS_ERROR);
+        }
+        //创建新用户容器
+        SysUser user = new SysUser();
+        //将userAddVo中的数据复制到user中
+        BeanUtils.copyProperties(vo,user);
+        //设置用户的id
+        user.setId(idWorker.nextId());
+//        //设置用户名
+//        user.setUsername(vo.getUsername());
+        //设置密码,并将密码加密
+        user.setPassword(passwordEncoder.encode(vo.getPassword()));
+//        //设置邮箱
+//        user.setEmail(vo.getEmail());
+//        //设置昵称
+//        user.setNickName(vo.getNickName());
+//        //设置真实姓名
+//        user.setRealName(vo.getRealName());
+//        //设置性别
+//        user.setSex(vo.getSex());
+        //添加创建人和修改人
+        //设置状态
+        user.setStatus(1);
+        //添加更新和创建时间
+        user.setCreateTime(new Date());
+        user.setUpdateTime(new Date());
+        //添加是否被删除
+        user.setDeleted(1);
+
+        //插入数据
+        int row = sysUserMapper.insert(user);
+        if (row != 1) {
+            throw new BusinessException(ResponseCode.ERROR.getMessage());
+        }
+        return R.ok(ResponseCode.SUCCESS.getMessage());
+    }
+
+    /**
+     * 修改个人密码
+     * @param vo
+     * @return
+     */
+    @Override
+    public R<String> updatePassword(UserUpdatePassword vo) {
+        //判断传入的请求参数是否为空
+        if (vo == null) {
+            throw new BusinessException(ResponseCode.DATA_ERROR.getMessage());
+        }
+
+        //将数据复制到SysUser类中
+        SysUser sysUser = new SysUser();
+        BeanUtils.copyProperties(vo,sysUser);
+        //设置密码,并将密码加密
+        sysUser.setPassword(passwordEncoder.encode(vo.getNewPwd()));
+//        String newPassword = vo.substring(1);
+//        sysUser.setPassword(passwordEncoder.encode(newPassword));
+
+        //修改的时间要更新
+        sysUser.setUpdateTime(new Date());
+        int row  = sysUserMapper.updateByPrimaryKey(sysUser);
+        //响应数据
+        return R.ok(ResponseCode.SUCCESS.getMessage());
+    }
+
+    /**
+     * 重置用户密码
+     * @param id
+     * @return
+     */
+    @Override
+    public R<String> ResetPassword(Long id) {
+        //判断id是否存在
+        if (id == null) {
+            throw new BusinessException(ResponseCode.ERROR.getMessage());
+        }
+        //根据id查询用户信息
+        SysUser sysUser = sysUserMapper.selectByPrimaryKey(id);
+
+        //将信息复制到个人资料里面
+//        BeanUtils.copyProperties(sysUser,userInfoRespVo);
+        sysUser.setPassword(passwordEncoder.encode("123456789"));
+        sysUser.setUpdateTime(new Date());
+        int row  = sysUserMapper.updateByPrimaryKey(sysUser);
+        //响应数据
+        return R.ok(ResponseCode.SUCCESS.getMessage());
+    }
+
 
 }

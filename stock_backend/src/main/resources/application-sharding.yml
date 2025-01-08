@@ -1,0 +1,120 @@
+common:
+    sharding4db: com.zit.stock.sharding.CommonAlg4Db
+    sharding4tb: com.zit.stock.sharding.CommonAlg4Tb
+spring:
+    shardingsphere:
+        datasource:
+            defdb:
+                driver-class-name: com.mysql.jdbc.Driver
+                password: 1234
+                type: com.alibaba.druid.pool.DruidDataSource
+                url: jdbc:mysql://192.168.86.128:3306/stock_sys_db?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
+                username: root
+            ds-2021:
+                driver-class-name: com.mysql.jdbc.Driver
+                password: 1234
+                type: com.alibaba.druid.pool.DruidDataSource
+                url: jdbc:mysql://192.168.86.128:3306/stock_db_2021?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
+                username: root
+            ds-2022:
+                driver-class-name: com.mysql.jdbc.Driver
+                password: 1234
+                type: com.alibaba.druid.pool.DruidDataSource
+                url: jdbc:mysql://192.168.86.128:3306/stock_db_2022?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
+                username: root
+            ds-2023:
+                driver-class-name: com.mysql.jdbc.Driver
+                password: 1234
+                type: com.alibaba.druid.pool.DruidDataSource
+                url: jdbc:mysql://192.168.86.128:3306/stock_db_2023?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
+                username: root
+            ds-2024:
+                driver-class-name: com.mysql.jdbc.Driver
+                password: 1234
+                type: com.alibaba.druid.pool.DruidDataSource
+                url: jdbc:mysql://192.168.86.128:3306/stock_db_2024?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
+                username: root
+            ds-2025:
+                driver-class-name: com.mysql.jdbc.Driver
+                password: 1234
+                type: com.alibaba.druid.pool.DruidDataSource
+                url: jdbc:mysql://192.168.86.128:3306/stock_db_2025?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
+                username: root
+            names: defdb,ds-2021,ds-2022,ds-2023,ds-2024,ds-2025
+            dynamic:
+                primary: ds-2025
+                ds-2025:
+                    driver-class-name: com.mysql.jdbc.Driver
+                    password: 1234
+                    type: com.alibaba.druid.pool.DruidDataSource
+                    url: jdbc:mysql://192.168.86.128:3306/stock_db_2025?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
+                    username: root
+            druid:
+                #监控统计拦截的filters
+                filters: stat,wall
+                #druid配置
+                #配置初始化大小/最小/最大
+                initialSize: 5
+                minIdle: 5
+                maxActive: 20
+                #获取连接等待超时时间
+                maxWait: 60000
+                #间隔多久进行一次检测，检测需要关闭的空闲连接
+                timeBetweenEvictionRunsMillis: 60000
+                #一个连接在池中最小生存的时间
+                minEvictableIdleTimeMillis: 300000
+                validationQuery: SELECT 1 FROM DUAL
+                testWhileIdle: true
+                testOnBorrow: false
+                testOnReturn: false
+                #打开PSCache，并指定每个连接上PSCache的大小。oracle设为true，mysql设为false。分库分表较多推荐设置为false
+                poolPreparedStatements: false
+                maxPoolPreparedStatementPerConnectionSize: 20
+                # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+                connectionProperties:
+                    druid:
+                        stat:
+                            mergeSql: true
+                            slowSqlMillis: 5000
+
+
+
+        sharding:
+            broadcast-tables: stock_business
+            default-data-source-name: defdb
+            tables:
+                stock_block_rt_info:
+                    actual-data-nodes: ds-${2021..2025}.stock_block_rt_info
+                    database-strategy:
+                        standard:
+                            precise-algorithm-class-name: ${common.sharding4db}
+                            range-algorithm-class-name: ${common.sharding4db}
+                            sharding-column: cur_time
+                stock_market_index_info:
+                    actual-data-nodes: ds-${2021..2025}.stock_market_index_info
+                    database-strategy:
+                        standard:
+                            precise-algorithm-class-name: ${common.sharding4db}
+                            range-algorithm-class-name: ${common.sharding4db}
+                            sharding-column: cur_time
+                stock_outer_market_index_info:
+                    actual-data-nodes: ds-${2021..2025}.stock_outer_market_index_info
+                    database-strategy:
+                        standard:
+                            precise-algorithm-class-name: ${common.sharding4db}
+                            range-algorithm-class-name: ${common.sharding4db}
+                            sharding-column: cur_time
+                stock_rt_info:
+                    actual-data-nodes: ds-2021.stock_rt_info_${202101..202112},ds-2022.stock_rt_info_${202201..202212},ds-2023.stock_rt_info_${202301..202312},ds-2024.stock_rt_info_${202401..202412},ds-2025.stock_rt_info_${202501..202512}
+                    database-strategy:
+                        standard:
+                            precise-algorithm-class-name: ${common.sharding4db}
+                            range-algorithm-class-name: ${common.sharding4db}
+                            sharding-column: cur_time
+                    table-strategy:
+                        standard:
+                            precise-algorithm-class-name: ${common.sharding4tb}
+                            range-algorithm-class-name: ${common.sharding4tb}
+                            sharding-column: cur_time
+
+

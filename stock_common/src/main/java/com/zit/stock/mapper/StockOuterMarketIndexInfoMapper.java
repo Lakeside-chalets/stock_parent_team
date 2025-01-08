@@ -29,12 +29,12 @@ public interface StockOuterMarketIndexInfoMapper {
 
     /**
      *获取国外大盘的最新数据，(按降序显示前四条)
-     * @param curDate 当前时间
-     * @param outerMcodes 外盘编码
+//     * @param curDate 当前时间
+//     * @param outerMcodes 外盘编码
      * @return
      */
     List<OuterMarketDomain> getOutMarketInfo(@Param("curTime") Date curDate, @Param("outerMcodes") List<String> outerMcodes);
-
+    List<OuterMarketDomain> getOutMarketInfoByDate();
     /**
      * 批量插入国外大盘数据
      * @param entities

@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * @author by itheima
+ * @author by mianbaoren
  * @Date 2022/1/1
  * @Description 定义访问http服务的配置类
  */

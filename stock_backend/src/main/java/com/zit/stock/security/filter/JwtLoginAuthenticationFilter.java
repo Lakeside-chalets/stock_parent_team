@@ -59,14 +59,17 @@ public class JwtLoginAuthenticationFilter extends AbstractAuthenticationProcessi
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
         //请求必须是post请求
-        if (!request.getMethod().equalsIgnoreCase("POST") || ! (MediaType.APPLICATION_JSON_VALUE.equalsIgnoreCase(request.getContentType()) || MediaType.APPLICATION_JSON_UTF8_VALUE.equalsIgnoreCase(request.getContentType())) ) {
+        if (!request.getMethod().equalsIgnoreCase("POST") ||
+                ! (MediaType.APPLICATION_JSON_VALUE.equalsIgnoreCase(request.getContentType()) ||
+                        MediaType.APPLICATION_JSON_UTF8_VALUE.equalsIgnoreCase(request.getContentType())) ) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
         //获取post请求ajax传入的数据流
         LoginReqVo reqVo = new ObjectMapper().readValue(request.getInputStream(), LoginReqVo.class);
         //校验输出的验证码是否正确
         //补充：根据传入的rkye从redis中获取校验码
-        String rCheckCode =(String) redisTemplate.opsForValue().get(StockConstant.CHECK_PREFIX + reqVo.getSessionId());
+        String rCheckCode =(String) redisTemplate.opsForValue()
+                            .get(StockConstant.CHECK_PREFIX + reqVo.getSessionId());
         //设置响应格式和编码
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("utf-8");

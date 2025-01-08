@@ -24,7 +24,7 @@ public class StockNewTransactionDomain {
      * 当前日期
      */
     @ApiModelProperty("当前时间")
-    @JsonFormat(pattern = "yyyyMMddHH:mm")
+    @JsonFormat(pattern = "yyyyMMdd HH:mm",timezone = "Asia/Shanghai")
     private Date date;
     /**
      * 最新交易量

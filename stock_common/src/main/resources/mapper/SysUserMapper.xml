@@ -42,7 +42,7 @@
         select
         <include refid="Base_Column_List" />
         from sys_user
-        where   username= #{name}
+        where   username= #{name} and deleted != 0 and status !=2
     </select>
     <select id="findUserAllInfoByPage" resultType="com.zit.stock.pojo.domain.UserPageListInfoDomain">
         SELECT

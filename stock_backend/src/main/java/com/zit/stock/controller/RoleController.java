@@ -1,5 +1,6 @@
 package com.zit.stock.controller;
 
+import com.zit.stock.log.annotation.StockLog;
 import com.zit.stock.service.RoleService;
 import com.zit.stock.vo.req.RoleAddVo;
 import com.zit.stock.vo.req.RolePageVo;
@@ -11,6 +12,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -47,11 +49,13 @@ public class RoleController {
      * @param roleAddVo
      * @return
      */
+    @StockLog("组织管理-角色管理-新增角色")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "body", dataType = "RoleAddVo", name = "roleAddVo", value = "", required = true)
     })
     @ApiOperation(value = "添加角色和角色关联权限", notes = "添加角色和角色关联权限", httpMethod = "POST")
     @PostMapping("/role")
+    @PreAuthorize("hasAuthority('sys:log:delete')")//权限表示与数据库定义的标识一致
     public R<String> addRoleAndPermission(@RequestBody RoleAddVo roleAddVo) {
         return roleService.addRoleAndPermission(roleAddVo);
     }
@@ -61,6 +65,7 @@ public class RoleController {
      * @param roleId
      * @return
      */
+
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "path", dataType = "string", name = "roleId", value = "", required = true)
     })
@@ -75,11 +80,13 @@ public class RoleController {
      * @param vo
      * @return
      */
+    @StockLog("组织管理-角色管理-更新角色")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "body", dataType = "RoleUpdateVo", name = "vo", value = "", required = true)
     })
     @ApiOperation(value = "添加角色和角色关联权限,编辑角色信息提交的数据", notes = "添加角色和角色关联权限,编辑角色信息提交的数据", httpMethod = "PUT")
     @PutMapping("/role")
+    @PreAuthorize("hasAuthority('sys:role:update')")//权限表示与数据库定义的标识一致
     public R<String> updateRoleAndPermission (@RequestBody RoleUpdateVo vo){
         return roleService.updateRoleAndPermission(vo);
     }
@@ -89,11 +96,13 @@ public class RoleController {
      * @param roleId
      * @return
      */
+    @StockLog("组织管理-角色管理-删除角色")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "path", dataType = "long", name = "roleId", value = "", required = true)
     })
     @ApiOperation(value = "根据角色id删除角色", notes = "根据角色id删除角色", httpMethod = "DELETE")
     @DeleteMapping("/role/{roleId}")
+    @PreAuthorize("hasAuthority('sys:role:delete')")//权限表示与数据库定义的标识一致
     public R<String> deleteRole(@PathVariable("roleId") Long roleId){
         return roleService.deleteRole(roleId);
     }
@@ -104,6 +113,7 @@ public class RoleController {
      * @param status 状态 1.正常 0：禁用
      * @return
      */
+    @StockLog("组织管理-角色管理-更新角色状态")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "path", dataType = "long", name = "roleId", value = "角色id", required = true),
             @ApiImplicitParam(paramType = "path", dataType = "int", name = "status", value = "状态 1.正常 0：禁用", required = true)

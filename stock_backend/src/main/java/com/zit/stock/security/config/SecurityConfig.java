@@ -34,7 +34,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         String[] urls = {
                 "/**/*.css","/**/*.js","/favicon.ico","/doc.html",
                 "/druid/**","/webjars/**","/v2/api-docs","/api/captcha",
-                "/swagger/**","/swagger-resources/**","/swagger-ui.html"
+                "/swagger/**","/swagger-resources/**","/swagger-ui.html",
+                "/api/register","/xxl-job-admin/","/datasource.html"
         };
         return urls;
     }

@@ -12,7 +12,7 @@ import java.util.Map;
 * @author mianbaoren
 * @description 针对表【stock_business(主营业务表)】的数据库操作Mapper
 * @createDate 2024-08-26 22:52:27
-* @Entity com.itheima.stock.pojo.entity.StockBusiness
+* @Entity com.zit.stock.pojo.entity.StockBusiness
 */
 @ApiModel(description = "针对表【stock_business(主营业务表)】的数据库操作Mapper")
 public interface StockBusinessMapper {

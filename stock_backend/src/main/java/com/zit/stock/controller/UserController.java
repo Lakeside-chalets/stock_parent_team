@@ -1,5 +1,6 @@
 package com.zit.stock.controller;
 
+import com.zit.stock.log.annotation.StockLog;
 import com.zit.stock.pojo.entity.SysUser;
 import com.zit.stock.service.UserService;
 import com.zit.stock.vo.req.*;
@@ -12,6 +13,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,11 +22,11 @@ import java.util.Map;
 /**
  * @ClassName: UserController
  * @Description: 定义用户web层接口资源bean
- *
  * @Author: mianbaoren
  * @Date: 2024/8/27 14:26
  */
-@Api(value = "/api", tags = {": 定义用户web层接口资源bean"})
+
+@Api(value = "/api", tags = {"}"})
 @RestController// 定义一个restful风格的接口 是@Controller+@ResponseBody的结合体
 @RequestMapping("/api")
 public class UserController {
@@ -75,6 +77,23 @@ public class UserController {
     }
 
     /**
+     * 用户注册
+     * @param vo
+     * @return
+     */
+
+
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "RegisterReqVo", name = "vo", value = "", required = true)
+    })
+    @ApiOperation(value = "用户注册", notes = "用户注册", httpMethod = "POST")
+    @PostMapping("/register")
+    public R<String> UserRegister (@RequestBody RegisterReqVo vo){
+        return userService.userRegister(vo);
+    }
+
+
+    /**
      * 多条件查询,查询用户所有信息
      * @param userPageReqVo
      * @return
@@ -97,7 +116,9 @@ public class UserController {
             @ApiImplicitParam(paramType = "body", dataType = "UserAddReqVo", name = "userAddReqVo", value = "", required = true)
     })
     @ApiOperation(value = "添加用户", notes = "添加用户", httpMethod = "POST")
+    @StockLog("组织管理-用户管理-新增用户")
     @PostMapping("/user")
+    @PreAuthorize("hasAuthority('sys:user:add')")//权限表示与数据库定义的标识一致
     public R<String> addUsers (@RequestBody UserAddReqVo userAddReqVo){
         return userService.addUsers(userAddReqVo);
     }
@@ -125,7 +146,9 @@ public class UserController {
             @ApiImplicitParam(paramType = "body", dataType = "UserOneRoleReqVo", name = "vo", value = "", required = true)
     })
     @ApiOperation(value = "更新用户角色信息", notes = "更新用户角色信息", httpMethod = "PUT")
+    @StockLog("组织管理-用户管理-更新用户信息")
     @PutMapping("/user/roles")
+    @PreAuthorize("hasAuthority('sys:user:update')")//权限表示与数据库定义的标识一致
     public R<String> updateUserRolesInfo ( @RequestBody  UserOneRoleReqVo vo){
         return userService.updateUserRolesInfo(vo);
     }
@@ -139,7 +162,9 @@ public class UserController {
             @ApiImplicitParam(paramType = "body", dataType = "List<Long>", name = "userIds", value = "", required = true)
     })
     @ApiOperation(value = "批量删除用户信息", notes = "批量删除用户信息", httpMethod = "DELETE")
+    @StockLog("组织管理-用户管理-删除用户")
     @DeleteMapping("/user")
+    @PreAuthorize("hasAuthority('sys:user:delete')")//权限表示与数据库定义的标识一致
     public R<String> DeleteByUserid (@RequestBody List<Long> userIds){
         return userService.DeleteByUserid(userIds);
     }
@@ -158,6 +183,7 @@ public class UserController {
         return userService.getUserInfo(userId);
     }
 
+
     /**
      * 据id更新用户基本信息
      * @param vo
@@ -172,4 +198,33 @@ public class UserController {
         return userService.updateUserInfo(vo);
     }
 
+    /**
+     * 修改个人密码
+     * @param vo
+     * @return
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "UserUpdatePassword", name = "vo", value = "", required = true)
+    })
+    @ApiOperation(value = "修改个人密码", notes = "修改个人密码", httpMethod = "PUT")
+    @StockLog("组织管理-用户管理-修改个人密码")
+    @PutMapping("/user/password")
+    public R<String> updatePassword (@RequestBody UserUpdatePassword vo){
+        return userService.updatePassword(vo);
+    }
+
+    /**
+     * 重置用户密码
+     * @param userId
+     * @return
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path", dataType = "long", name = "userId", value = "", required = true)
+    })
+    @ApiOperation(value = "重置用户密码", notes = "重置用户密码", httpMethod = "GET")
+    @StockLog("组织管理-用户管理-重置用户密码")
+    @GetMapping("/user/password/{userId}")
+    public R<String> ResetPassword (@PathVariable("userId") Long userId){
+        return userService.ResetPassword(userId);
+    }
 }

@@ -17,8 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -61,13 +63,15 @@ public class StockServiceImpl implements StockService {
         //默认从本地缓存加载数据，如果不存在则从数据库加载并同步到本地缓存
             //在开盘周期内，本地缓存默认有效期为1分钟
         R<List<InnerMarketDomain>> result = (R<List<InnerMarketDomain>>) caffeineCache.get("innerMarketKey", key -> {
-            //        //1.获取股票的最新交易时间点（精确到分钟，秒和毫秒置为0）
-//        DateTime curDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
-//        //将第三方的时间转换成jdk的日期时间
-//        Date curDate = curDateTime.toDate();
-            DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+            //1.获取股票的最新交易时间点（精确到分钟，秒和毫秒置为0）
+            DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now().minusMinutes(1));
             //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
-            dateTime=DateTime.parse("2022-01-03 14:52:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+            //dateTime=DateTime.parse("2024-12-18 14:52:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+            //TODO 创建一个 DateTimeFormatter 实例来定义输出格式
+                DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+                // 使用 formatter 来格式化 dateTime 对象
+                String formattedDateTime = formatter.print(dateTime);
+            //将第三方的时间转换成jdk的日期时间
             Date curDate = dateTime.toDate();
             //2.获取大盘编码集合
             List<String> mCodes = stockInfoConfig.getInner();
@@ -75,24 +79,91 @@ public class StockServiceImpl implements StockService {
             List<InnerMarketDomain>  data = stockMarketIndexInfoMapper.getMarketInfo(curDate,mCodes);
             //4.封装并响应
             return R.ok(data);
-        });
+        }
+        );
         return result;
-
     }
+//    @Override
+//    public R<List<InnerMarketDomain>> getInnerMarketInfo() {
+//        String cacheKey = "innerMarketKey";
+////        R<List<InnerMarketDomain>> cachedResult = null;
+//
+//        // 尝试从缓存中获取数据
+//        R<List<InnerMarketDomain>> cachedResult = (R<List<InnerMarketDomain>>) caffeineCache.getIfPresent(cacheKey);
+//
+//        // 检查缓存中是否有数据且数据不为空
+//        if (cachedResult != null && cachedResult.getData().size() == 0 && !cachedResult.getData().isEmpty()) {
+//            // 缓存中有有效数据，直接返回
+//            return cachedResult;
+//        }
+//
+//        // 缓存中没有数据或数据为空，需要加锁以避免并发问题
+//        synchronized (this) {
+//            // 再次检查缓存，因为可能有其他线程在我们等待锁时已经更新了缓存
+//            cachedResult = (R<List<InnerMarketDomain>>) caffeineCache.getIfPresent(cacheKey);
+//            if (cachedResult != null && cachedResult.getData().size() == 0 && !cachedResult.getData().isEmpty()) {
+//                // 缓存已被其他线程更新，直接返回
+//                return cachedResult;
+//            }
+//
+//            // 执行数据库查询
+//            DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+//            Date curDate = dateTime.toDate();
+//            List<String> mCodes = stockInfoConfig.getInner();
+//            List<InnerMarketDomain> data = stockMarketIndexInfoMapper.getMarketInfo(curDate, mCodes);
+//            // 封装查询结果
+//            R<List<InnerMarketDomain>> newResult = R.ok(data);
+//            // 将新结果放入缓存
+//            caffeineCache.put(cacheKey, newResult);
+//            // 返回新结果
+//            return newResult;
+//        }
+//    }
     /**
      * 获取国内板块的最新数据
      * @return
      */
     @Override
     public R<List<StockBlockDomain>> getStockBlockInfo() {
+        //默认从本地缓存加载数据，如果不存在则从数据库加载并同步到本地缓存
+        //在开盘周期内，本地缓存默认有效期为1分钟
+        R<List<StockBlockDomain>> result = (R<List<StockBlockDomain>>) caffeineCache.get("StockBlockKey", key -> {
         //1.获取最新的交易时间(利用第三方时间工具类，并用toDate转换成jdk时间）
         DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
         //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
-        dateTime=DateTime.parse("2021-12-27 14:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+//        dateTime=DateTime.parse("2021-12-27 14:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+        //TODO 创建一个 DateTimeFormatter 实例来定义输出格式
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        // 使用 formatter 来格式化 dateTime 对象
+        String formattedDateTime = formatter.print(dateTime);
         Date curDate = dateTime.toDate();
         //调用mapper查询数据
         List<StockBlockDomain> data =  stockBlockRtInfoMapper.getBlockInfo(curDate);
         return R.ok(data);
+    }
+    );
+        return result;
+    }
+
+    public List<StockUpdownDomain> getStockInfobycache(){
+        //默认从本地缓存加载数据，如果不存在则从数据库加载并同步到本地缓存
+        //在开盘周期内，本地缓存默认有效期为1分钟
+        List<StockUpdownDomain> result = (List<StockUpdownDomain>) caffeineCache.get("StockRtBypageKey", key -> {
+        //1.获取最新的交易时间(利用第三方时间工具类，并用toDate转换成jdk时间）
+        DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now().minusMinutes(1));
+        //TODO: mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
+//        dateTime=DateTime.parse("2024-12-17 09:42:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+        //TODO: 创建一个 DateTimeFormatter 实例来定义输出格式
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        // 使用 formatter 来格式化 dateTime 对象
+        String formattedDateTime = formatter.print(dateTime);
+        Date curDate = dateTime.toDate();
+        //3.调用mapper查询数据
+        List<StockUpdownDomain> pageData = stockRtInfoMapper.getStockByTime(curDate);
+        return pageData;
+    }
+        );
+        return result;
     }
 
     /**
@@ -103,22 +174,42 @@ public class StockServiceImpl implements StockService {
      */
     @Override
     public R<PageResult<StockUpdownDomain>> getStockInfoByPage(Integer page, Integer pageSize) {
-        //1.获取最新的交易时间(利用第三方时间工具类，并用toDate转换成jdk时间）
-        DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
-        //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
-        dateTime=DateTime.parse("2021-12-30 09:42:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
-        Date curDate = dateTime.toDate();
+//
+//        // 生成唯一的缓存键
+//        String cacheKey = "StockPageInfo_" + page + "_" + pageSize;
+//
+//        // 尝试从缓存中获取数据
+//        R<PageResult<StockUpdownDomain>> cachedResult = (R<PageResult<StockUpdownDomain>>) caffeineCache.getIfPresent(cacheKey);
+//        if (cachedResult != null) {
+//            // 如果缓存中存在数据，则直接返回
+//            return cachedResult;
+//        }
+//        //1.获取最新的交易时间(利用第三方时间工具类，并用toDate转换成jdk时间）
+//        DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+//        //TODO: mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
+////        dateTime=DateTime.parse("2024-12-17 09:42:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+//        //TODO: 创建一个 DateTimeFormatter 实例来定义输出格式
+//        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+//        // 使用 formatter 来格式化 dateTime 对象
+//        String formattedDateTime = formatter.print(dateTime);
+//        Date curDate = dateTime.toDate();
         //2.设置pageHelper分页参数
         PageHelper.startPage(page,pageSize);
-        //3.调用mapper查询数据
-        List<StockUpdownDomain> pageData = stockRtInfoMapper.getStockByTime(curDate);
+//        //3.调用mapper查询数据
+        List<StockUpdownDomain> pageData = getStockInfobycache();
         //4.组装pageResult对象
 //        PageInfo<StockUpdownDomain> pageInfo = new PageInfo<>(pageData);
 //        PageResult<StockUpdownDomain> pageResult = new PageResult<>(pageInfo);
+
         PageResult<StockUpdownDomain> pageResult = new PageResult<>(new PageInfo<>(pageData));
+
+        // 将查询结果放入缓存中（可以设置过期时间）
+//        caffeineCache.put(cacheKey, R.ok(pageResult)); // 假设缓存有效期为1分钟
+
         //5.响应数据
         return R.ok(pageResult);
     }
+
 
     /**
      * 公布最新的涨幅榜数据
@@ -126,15 +217,37 @@ public class StockServiceImpl implements StockService {
      */
     @Override
     public R<List<StockUpdownDomain>> getStockInfoByPageonBoard() {
-        //1.获取最新的交易时间(利用第三方时间工具类，并用toDate转换成jdk时间）
-        DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
-        //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
-        dateTime=DateTime.parse("2021-12-30 09:42:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
-        Date curDate = dateTime.toDate();
-        //3.调用mapper查询数据
-        List<StockUpdownDomain> data = stockRtInfoMapper.getStockByTimeonBoard(curDate);
-        //4.响应数据
-        return R.ok(data);
+        //默认从本地缓存加载数据，如果不存在则从数据库加载并同步到本地缓存
+        //在开盘周期内，本地缓存默认有效期为1分钟
+        // 生成唯一的缓存键
+//        String cacheKey = "StockRtInfoKey";
+//
+//        // 尝试从缓存中获取数据
+//        R<List<StockUpdownDomain>> cachedResult = (R<List<StockUpdownDomain>>) caffeineCache.getIfPresent(cacheKey);
+//        if (cachedResult.getData() != null) {
+//            // 如果缓存中存在数据，则直接返回
+//            return cachedResult;
+//        }
+        R<List<StockUpdownDomain>> result = (R<List<StockUpdownDomain>>) caffeineCache.get("StockRtInfoKey", key -> {
+//            1.获取最新的交易时间(利用第三方时间工具类，并用toDate转换成jdk时间）
+            DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now().minusMinutes(1));
+            //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
+//        dateTime=DateTime.parse("2021-12-30 09:42:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+            //TODO 创建一个 DateTimeFormatter 实例来定义输出格式
+            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+            // 使用 formatter 来格式化 dateTime 对象
+            String formattedDateTime = formatter.print(dateTime);
+            Date curDate = dateTime.toDate();
+            //3.调用mapper查询数据
+            List<StockUpdownDomain> data = stockRtInfoMapper.getStockByTimeonBoard(curDate);
+            // 将查询结果放入缓存中（可以设置过期时间）
+//            caffeineCache.put(cacheKey, R.ok(cachedResult)); // 假设缓存有效期为1分钟
+            //4.响应数据
+            return R.ok(data);
+
+        }
+        );
+        return result;
     }
 
     /**
@@ -146,12 +259,16 @@ public class StockServiceImpl implements StockService {
         //1.获取最新的交易时间(利用第三方时间工具类，并用toDate转换成jdk时间）
         DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
         //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
-        dateTime=DateTime.parse("2021-12-30 15:01:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+//        dateTime=DateTime.parse("2021-12-30 15:01:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+        //TODO 创建一个 DateTimeFormatter 实例来定义输出格式
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        // 使用 formatter 来格式化 dateTime 对象
+        String formattedDateTime = formatter.print(dateTime);
         Date endDate = dateTime.toDate();
         //2.获取最新交易时间点所对应的开盘时间点
         Date openDate = DateTimeUtil.getOpenDate(dateTime).toDate();
         //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
-        openDate=DateTime.parse("2021-12-30 09:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+//        openDate=DateTime.parse("2021-12-30 09:30:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
 
         //3.统计涨停数据
         List<Map> upList =  stockRtInfoMapper.getUpDownCount(openDate,endDate,1);
@@ -211,7 +328,11 @@ public class StockServiceImpl implements StockService {
         //1.获取T日(最新股票交易日的日期范围）
         DateTime TEndDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
         //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
-        TEndDateTime=DateTime.parse("2021-12-28 14:50:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+//        TEndDateTime=DateTime.parse("2021-12-28 14:50:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+        //TODO 创建一个 DateTimeFormatter 实例来定义输出格式
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        // 使用 formatter 来格式化 dateTime 对象
+        String formattedDateTime = formatter.print(TEndDateTime);
         Date tEndDate = TEndDateTime.toDate();
 
             //开盘时间
@@ -219,7 +340,7 @@ public class StockServiceImpl implements StockService {
         //2.获取T-1日(最新股票交易日的日期范围）
         DateTime PreEndDate = DateTimeUtil.getPreviousTradingDay(TEndDateTime);
         //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
-        PreEndDate=DateTime.parse("2021-12-27 14:50:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));;
+//        PreEndDate=DateTime.parse("2021-12-27 14:50:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));;
         Date preTEndDate = PreEndDate.toDate();
             //开盘时间
         Date preTStartDate = DateTimeUtil.getOpenDate(PreEndDate).toDate();
@@ -243,9 +364,13 @@ public class StockServiceImpl implements StockService {
     @Override
     public R<Map> getIncreaseRangeInfo() {
         //1.获取最新的交易时间(利用第三方时间工具类，并用toDate转换成jdk时间）
-        DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+        DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now().minusMinutes(1));
         //TODO mock测试数据，后期数据通过第三方接口动态获取实时数据 可删除
-        dateTime=DateTime.parse("2021-12-30 09:42:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+//        dateTime=DateTime.parse("2021-12-30 09:42:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+        //TODO 创建一个 DateTimeFormatter 实例来定义输出格式
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        // 使用 formatter 来格式化 dateTime 对象
+        String formattedDateTime = formatter.print(dateTime);
         Date curDate = dateTime.toDate();
         //调用mapper查询
         List<Map> data = stockRtInfoMapper.getIncreaseRangeInfoByDate(curDate);
@@ -298,7 +423,11 @@ public class StockServiceImpl implements StockService {
         //1.获取T日最新交易股票的交易时间点，endTime
         DateTime enDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
         //TODO:moctime
-        enDateTime = DateTime.parse("2021-12-30 14:32:00",DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+//        enDateTime = DateTime.parse("2021-12-30 14:32:00",DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+        //TODO 创建一个 DateTimeFormatter 实例来定义输出格式
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        // 使用 formatter 来格式化 dateTime 对象
+        String formattedDateTime = formatter.print(enDateTime);
         Date enDate = enDateTime.toDate();
         //开盘时间
         Date openDate = DateTimeUtil.getOpenDate(enDateTime).toDate();
@@ -318,12 +447,16 @@ public class StockServiceImpl implements StockService {
         //1.获取最新的股票交易时间点，截止时间
         DateTime endDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
         //TODO:moctime
-        endDateTime = DateTime.parse("2022-02-19 09:32:00" ,DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+//        endDateTime = DateTime.parse("2022-02-19 09:32:00" ,DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+        //TODO 创建一个 DateTimeFormatter 实例来定义输出格式
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        // 使用 formatter 来格式化 dateTime 对象
+        String formattedDateTime = formatter.print(endDateTime);
         Date endDate = endDateTime.toDate();
         //起始时间
         DateTime startDateTime = endDateTime.minusDays(10);
         //TODO:moctime
-        startDateTime = DateTime.parse("2021-12-19 09:32:00" ,DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+//        startDateTime = DateTime.parse("2021-12-19 09:32:00" ,DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
         Date startDate = startDateTime.toDate();
         //根据mapper查询,(方案1：嵌套表查询，会产生性能问题）
 //        List<Stock4EvrDayDomain> data = stockRtInfoMapper.getStockByDayKlin(startDate,enDate,stockCode);
@@ -365,12 +498,19 @@ public class StockServiceImpl implements StockService {
 
         //指定默认日期范围下的数据
         DateTime curDateTime = DateTime.now();
+        //TODO 创建一个 DateTimeFormatter 实例来定义输出格式
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        // 使用 formatter 来格式化 dateTime 对象
+        String formattedDateTime = formatter.print(curDateTime);
         //截止时间
         Date endTime = curDateTime.toDate();
-        endTime=DateTime.parse("2022-05-22 09:30:00",DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        //TODO:mockTime
+        //endTime=DateTime.parse("2022-05-22 09:30:00",DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+
         //开始时间
         Date startTime = curDateTime.minusWeeks(10).toDate();
-        startTime=DateTime.parse("2021-01-01 09:30:00",DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+        //TODO:mockTime
+//        startTime=DateTime.parse("2021-01-01 09:30:00",DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
         //根据指定日期范围查询周K线数据
 //        List<Stock4EvrWeekDomain> infos=stockRtInfoMapper.getWeekLineData(stockCode,startTime,endTime);
         List<Stock4EveryWeekDomain> infos=stockRtInfoMapper.getStockWeekKLineByCode(stockCode,startTime,endTime);
@@ -401,27 +541,53 @@ public class StockServiceImpl implements StockService {
      * 获取国外大盘的最新数据，(按降序显示前四条)
      * @return
      */
+//    @Override
+//    public R<List<OuterMarketDomain>> getOutMarketInfo() {
+//        //默认从本地缓存加载数据，如果不存在则从数据库加载并同步到本地缓存
+//        //在开盘周期内，本地缓存默认有效期为1分钟
+////        R<List<OuterMarketDomain>> result = (R<List<OuterMarketDomain>>) caffeineCache.get("outerMarketKey", key -> {
+//            //1.获取最新时间交易时间点
+//            DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+//            //TODO: mock时间
+//            dateTime = DateTime.parse("2022-01-01 10:57:00",DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+//            Date curDate = dateTime.toDate();
+////        //2.获取国内大盘集合
+//            List<String> outerMcodes = stockInfoConfig.getOuter();
+//            //3.调用mapper查询
+//            List<OuterMarketDomain> data = stockOuterMarketIndexInfoMapper.getOutMarketInfo(curDate,outerMcodes);
+//            //4.封装数据并响应
+//            return R.ok(data);
+////        });
+////        return result;
+//
+//    }
+
+    /**
+     * 获取最新外盘指数
+     * @return
+     */
     @Override
     public R<List<OuterMarketDomain>> getOutMarketInfo() {
         //默认从本地缓存加载数据，如果不存在则从数据库加载并同步到本地缓存
         //在开盘周期内，本地缓存默认有效期为1分钟
         R<List<OuterMarketDomain>> result = (R<List<OuterMarketDomain>>) caffeineCache.get("outerMarketKey", key -> {
-            //1.获取最新时间交易时间点
-            DateTime dateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
-            //TODO: mock时间
-            dateTime = DateTime.parse("2022-01-01 10:57:00",DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
-            Date curDate = dateTime.toDate();
-//        //2.获取国内大盘集合
-            List<String> outerMcodes = stockInfoConfig.getOuter();
-            //3.调用mapper查询
-            List<OuterMarketDomain> data = stockOuterMarketIndexInfoMapper.getOutMarketInfo(curDate,outerMcodes);
-            //4.封装数据并响应
+            //由于国外开盘时间不稳定，所以根据时间和大盘点数降序获取前四条数据即可
+            //调用mapper接口获取最新外盘指数
+            List<OuterMarketDomain> data = stockOuterMarketIndexInfoMapper.getOutMarketInfoByDate();
+
+            //判断非空
+            if (CollectionUtils.isEmpty(data)) {
+                data = new ArrayList<>();
+                log.error("没有查询到数据");
+            }
+//        System.out.println("外盘"+data);
+//            log.error(String.valueOf(R.ok(data)));
             return R.ok(data);
-        });
+        }
+        );
+//        log.error(String.valueOf(result));
         return result;
-
     }
-
 
 
     /**
@@ -465,10 +631,15 @@ public class StockServiceImpl implements StockService {
     @Override
     public R<StockNewPriceDomain> getStockNewPriceInfo(String code) {
 // 获取最新股票有效交易日
-        DateTime lastDate4Stock = DateTimeUtil.getLastDate4Stock(DateTime.now());
-        Date endTime = lastDate4Stock.toDate();
+        DateTime lastDate4Stock = DateTimeUtil.getLastDate4Stock(DateTime.now().minusMinutes(1));
+
         // TODO moke 测试数据
-        endTime = DateTime.parse("2022-01-05 09:47:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+//        endTime = DateTime.parse("2022-01-05 09:47:00", DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"));
+        // 创建一个 DateTimeFormatter 实例来定义输出格式
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        // 使用 formatter 来格式化 dateTime 对象
+        String formattedDateTime = formatter.print(lastDate4Stock);
+        Date endTime = lastDate4Stock.toDate();
         //调用mapper查询
         //方案2：先获取指定日期范围内的收盘时间点集合
         StockNewPriceDomain data  = stockRtInfoMapper.getStockNewPriceByCode(code,endTime);

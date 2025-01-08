@@ -78,6 +78,6 @@ public class InnerMarketDomain {
      * 当前时间（对应数据产生的时间）
      */
     @ApiModelProperty("当前时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm" ,timezone = "Asia/Shanghai")
     private Date curTime;
 }

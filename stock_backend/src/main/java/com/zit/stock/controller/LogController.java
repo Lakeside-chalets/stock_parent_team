@@ -1,5 +1,6 @@
 package com.zit.stock.controller;
 
+import com.zit.stock.log.annotation.StockLog;
 import com.zit.stock.service.LogService;
 import com.zit.stock.vo.req.LogPageReqVo;
 import com.zit.stock.vo.resp.PageResult;
@@ -55,7 +56,7 @@ public class LogController {
      * @return
      */
 
-    //    @StockLog("日志删除")
+        @StockLog("日志删除")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "body", dataType = "List<Long>", name = "logIds", value = "", required = true)
     })

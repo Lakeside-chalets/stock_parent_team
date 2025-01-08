@@ -50,7 +50,7 @@ public class Stock4EveryWeekDomain {
     /**
      * 一周的最大时间，一般指周五
      */
-    @JsonFormat(pattern = "yyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "Asia/Shanghai")
     private Date mxTime;
 
     /**

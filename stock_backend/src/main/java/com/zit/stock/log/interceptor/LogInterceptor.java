@@ -5,8 +5,11 @@ import com.zit.stock.constant.StockConstant;
 import com.zit.stock.log.annotation.StockLog;
 import com.zit.stock.log.utils.RequestInfoUtil;
 import com.zit.stock.mapper.SysLogMapper;
+import com.zit.stock.mapper.SysUserMapper;
 import com.zit.stock.pojo.entity.SysLog;
+import com.zit.stock.security.utils.JwtTokenUtil;
 import com.zit.stock.utils.IdWorker;
+import io.jsonwebtoken.Jwt;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -37,6 +40,9 @@ public class LogInterceptor implements HandlerInterceptor {
     @Autowired
     private SysLogMapper sysLogMapper;
 
+    @Autowired
+    private SysUserMapper sysUserMapper;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         //从reqeust获取请求基本信息
@@ -49,14 +55,24 @@ public class LogInterceptor implements HandlerInterceptor {
                  //获取用户信息
                  String userInfo = request.getHeader(StockConstant.TOKEN_HEADER);
                  String userName=null;
+//                 String userName= JwtTokenUtil.getUsername(userInfo);
                  Long userId=null;
-                 if (StringUtils.isBlank(userInfo) || !userInfo.contains(":")) {
+//                 if (StringUtils.isBlank(userInfo) || !userInfo.contains(":")) {
+//                     userName="匿名用户";
+//                 }else {
+//                     //TODO 后续jwt解析获取用户信息
+//                     String[] infos = userInfo.split(":");
+//                     userId=Long.valueOf(infos[0]);
+//                     userName=infos[1];
+//                 }
+          if (StringUtils.isBlank(userInfo) || !userInfo.contains(".")) {
                      userName="匿名用户";
                  }else {
                      //TODO 后续jwt解析获取用户信息
-                     String[] infos = userInfo.split(":");
-                     userId=Long.valueOf(infos[0]);
-                     userName=infos[1];
+//                     String[] infos = userInfo.split(".");
+                     userName=JwtTokenUtil.getUsername(userInfo);
+                     userId=sysUserMapper.findByUserName(userName).getId();
+
                  }
                  //获取操作描述
                  StockLog anno = method.getMethod().getAnnotation(StockLog.class);
@@ -104,6 +120,7 @@ public class LogInterceptor implements HandlerInterceptor {
             //线程异步入库
             //sysLogMapper.insert(sysLog);
             threadPoolTaskExecutor.execute(()->{
+
                 sysLogMapper.insert(sysLog);
             });
         }

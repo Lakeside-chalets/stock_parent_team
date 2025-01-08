@@ -1,27 +1,26 @@
-package com.zit.stock.vo.resp;
+package com.zit.stock.vo.req;
 
 import lombok.Data;
 
 /**
- * @ClassName: UserInfoRespVo
+ * @ClassName: UserUpdatePassword
  * @Description: TODO
  * @Author: mianbaoren
- * @Date: 2024/10/1 15:52
+ * @Date: 2025/1/6 14:58
  */
 @Data
-public class UserInfoRespVo {
+public class UserUpdatePassword {
+
     /**
      * 用户id
      */
     private Long id;
+
     /**
      * 用户名
      */
     private String username;
-    /**
-     * 密码
-     */
-    private String password;
+
     /**
      *电话
      */
@@ -43,8 +42,21 @@ public class UserInfoRespVo {
      */
     private Integer sex;
     /**
+     *创建来源
+     */
+    private Integer createWhere;
+    /**
      * 用户状态，1表示正常，2表示锁定
      */
     private Integer status;
 
+    /**
+     * 旧密码
+     */
+    private String oldPwd;
+
+    /**
+     *新密码
+     */
+    private String newPwd;
 }

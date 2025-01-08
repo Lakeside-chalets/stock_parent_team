@@ -55,6 +55,13 @@
     <select id="findChildrenCountByParentId" resultType="java.lang.Integer">
         SELECT COUNT(*) FROM sys_permission WHERE pid=#{permissionId} AND deleted=1
     </select>
+    <select id="findChildren" resultType="java.lang.Long">
+        SELECT id FROM sys_permission WHERE pid=#{permissionId} AND deleted=1
+    </select>
+    <select id="checkIsMenu" resultType="java.lang.Boolean">
+        select count(*) from (select * from `sys_permission` where id = #{permissionId}) as t where pid  = 0
+    </select>
+
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from sys_permission

@@ -58,6 +58,6 @@ public class StockNewPriceDomain {
      * 当前日期
      */
     @ApiModelProperty("当前时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "Asia/Shanghai")
     private Date curDate;
 }

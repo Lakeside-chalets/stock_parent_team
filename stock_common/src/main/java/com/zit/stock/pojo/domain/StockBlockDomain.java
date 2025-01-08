@@ -53,7 +53,7 @@ public class StockBlockDomain {
      * 当前时间
      */
     @ApiModelProperty(value = "当前时间", position = 6)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm" ,timezone = "Asia/Shanghai")
     private Date curDate;
     /**
      * 交易总金额

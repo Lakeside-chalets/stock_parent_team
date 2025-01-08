@@ -28,12 +28,18 @@ public interface StockService {
     R<List<StockBlockDomain>> getStockBlockInfo();
 
     /**
+     * 分页的准备数据
+     * @return
+     */
+    List<StockUpdownDomain> getStockInfobycache();
+    /**
      * 分页查询最新的股票交易数据
      * @param page 当前页
      * @param pageSize 每页的大小
      * @return
      */
     R<PageResult<StockUpdownDomain>> getStockInfoByPage(Integer page, Integer pageSize);
+
     /**
      * 公布最新的涨幅榜数据
      * @return
@@ -87,8 +93,8 @@ public interface StockService {
      * 获取国外大盘的最新数据，按降序显示前四条
      * @return
      */
+//    R<List<OuterMarketDomain>> getOutMarketInfo();
     R<List<OuterMarketDomain>> getOutMarketInfo();
-
     /**
      * 根据个股编码模糊查询股票信息
      * @param searchStr

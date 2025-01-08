@@ -9,6 +9,7 @@ package com.zit.stock.vo.resp;
 public enum ResponseCode{
     ERROR(0,"操作失败"),
     SUCCESS(1,"操作成功"),
+    REGISTER_SUCCESS(1,"注册成功"),
     DATA_ERROR(0,"参数异常"),
     NO_RESPONSE_DATA(0,"无响应数据"),
     CHECK_CODE_NOT_EMPTY(0,"验证码不能为空"),

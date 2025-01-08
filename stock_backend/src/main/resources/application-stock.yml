@@ -9,6 +9,7 @@ stock:
     - int_hangseng # 恒生
     - int_nikkei # 日经指数
     - b_FSSTI # 新加坡
+    - b_FSSTI # 新加坡
   upDownRange:
     - "<-7%"
     - "-7~-5%"

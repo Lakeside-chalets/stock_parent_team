@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
     <artifactId>stock_job</artifactId>
-    <description>核心功能:拉去股票数据</description>
+    <description>核心功能:拉取股票数据</description>
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
@@ -38,6 +38,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
+
+<!--        &lt;!&ndash;jackson依赖 &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.fasterxml.jackson.dataformat</groupId>-->
+<!--            <artifactId>jackson-dataformat-xml</artifactId>-->
+<!--        </dependency>-->
         <!--引入xxljob核心依赖-->
         <dependency>
             <groupId>com.xuxueli</groupId>

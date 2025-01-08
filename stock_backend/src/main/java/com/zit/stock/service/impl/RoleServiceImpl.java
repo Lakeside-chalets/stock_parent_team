@@ -3,6 +3,7 @@ package com.zit.stock.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zit.stock.Exception.BusinessException;
+import com.zit.stock.mapper.SysPermissionMapper;
 import com.zit.stock.mapper.SysRoleMapper;
 import com.zit.stock.mapper.SysRolePermissionMapper;
 import com.zit.stock.pojo.entity.SysRole;
@@ -41,6 +42,8 @@ public class RoleServiceImpl implements RoleService {
     private IdWorker idWorker;
     @Autowired
     private SysRolePermissionMapper sysRolePermissionMapper;
+    @Autowired
+    private SysPermissionMapper sysPermissionMapper;
 
     /**
      * 分页查询当前角色信息
@@ -91,22 +94,40 @@ public class RoleServiceImpl implements RoleService {
         }
         //添加角色对应的权限
         List<Long> permissionsIds = roleAddVo.getPermissionsIds();
-        List<SysRolePermission> list = new ArrayList<>();
+        //获取父类权限的子集权限
+        List<Long> list = new ArrayList<>();
         //判断权限集合是否为空
-        if (!CollectionUtils.isEmpty(permissionsIds)) {
-            for (Long permissionsId : permissionsIds) {
+//        if (!CollectionUtils.isEmpty(permissionsIds)) {
+        //遍历目录权限集合
+        for (Long permissionsId : permissionsIds) {
+            //根据目录父集合找到子权限集合
+            List<Long> childPermissionId = sysPermissionMapper.findChildren(permissionsId);
+            //遍历子权限集合
+            for (Long child : childPermissionId) {
+                //添加进集合
+                list.add(child);
+            }
+            list.add(permissionsId);
+        }
+
+        List<SysRolePermission> listAll = new ArrayList<>();
+        //判断权限集合是否为空
+//        if (!CollectionUtils.isEmpty(permissionsIds)) {
+            for (Long permissionsId : list) {
                 SysRolePermission sysRolePermission = new SysRolePermission();
                 sysRolePermission.setId(idWorker.nextId());
                 sysRolePermission.setRoleId(sysRole.getId());
                 sysRolePermission.setPermissionId(permissionsId);
                 sysRolePermission.setCreateTime(new Date());
-                list.add(sysRolePermission);
+                listAll.add(sysRolePermission);
             }
-        }
-        //批量添加
-       int count = sysRolePermissionMapper.addRolePermissionInfo(list);
-        if (count == 0) {
-            throw new BusinessException(ResponseCode.DATA_ERROR.getMessage());
+//        }
+        if(listAll.size() != 0) {
+            //批量添加
+            int count = sysRolePermissionMapper.addRolePermissionInfo(listAll);
+            if (count == 0) {
+                throw new BusinessException(ResponseCode.DATA_ERROR.getMessage());
+            }
         }
         //响应数据
         return R.ok(ResponseCode.SUCCESS.getMessage());
@@ -154,20 +175,47 @@ public class RoleServiceImpl implements RoleService {
         //2.再修改角色权限表
             //先删除原来的权限再添加新的权限
         int count = sysRolePermissionMapper.deleteByRoleId(vo.getId());
-        //组装新的权限集合
-        List<SysRolePermission> list = new ArrayList<>();
-        for (Long permissionsId : vo.getPermissionsIds()) {
+        //添加角色对应的权限
+        List<Long> permissionsIds = vo.getPermissionsIds();
+        //获取父类权限的子集权限
+        List<Long> list = new ArrayList<>();
+        //判断权限集合是否为空
+//        if (!CollectionUtils.isEmpty(permissionsIds)) {
+        //遍历目录权限集合
+        for (Long permissionsId : permissionsIds) {
+            //判断是否是目录
+            Boolean checkIsMenu = sysPermissionMapper.checkIsMenu(permissionsId);
+            //如果是则跳过遍历循环，否则会添加一些不需要的权限
+            if(!checkIsMenu) {
+                //根据目录父集合找到子权限集合
+                List<Long> childPermissionId = sysPermissionMapper.findChildren(permissionsId);
+                //遍历子权限集合
+                for (Long child : childPermissionId) {
+                    //添加进集合
+                    list.add(child);
+                }
+            }
+            list.add(permissionsId);
+        }
+
+        List<SysRolePermission> listAll = new ArrayList<>();
+        //判断权限集合是否为空
+//        if (!CollectionUtils.isEmpty(permissionsIds)) {
+        for (Long permissionsId : list) {
             SysRolePermission sysRolePermission = new SysRolePermission();
             sysRolePermission.setId(idWorker.nextId());
-            sysRolePermission.setRoleId(vo.getId());
+            sysRolePermission.setRoleId(sysRole.getId());
             sysRolePermission.setPermissionId(permissionsId);
             sysRolePermission.setCreateTime(new Date());
-            list.add(sysRolePermission);
+            listAll.add(sysRolePermission);
         }
-        //批量插入
-        int count1 = sysRolePermissionMapper.addRolePermissionInfo(list);
-        if (count1 == 0) {
-            throw new BusinessException(ResponseCode.ERROR.getMessage());
+//        }
+        if(listAll.size() != 0) {
+            //批量添加
+            int result = sysRolePermissionMapper.addRolePermissionInfo(listAll);
+            if (result == 0) {
+                throw new BusinessException(ResponseCode.DATA_ERROR.getMessage());
+            }
         }
         //响应数据
         return R.ok(ResponseCode.SUCCESS.getMessage());
@@ -206,18 +254,27 @@ public class RoleServiceImpl implements RoleService {
      */
     @Override
     public R<String> updateRoleStatus(Long roleId, Integer status) {
-        //判断传入参数是否为空
-        if (roleId == null || status == null) {
-            throw new BusinessException(ResponseCode.DATA_ERROR.getMessage());
-        }
+//        //判断传入参数是否为空
+//        if (roleId == null || status == null) {
+//            throw new BusinessException(ResponseCode.DATA_ERROR.getMessage());
+//        }
+//        //组装数据
+//        SysRole sysRole = SysRole.builder()
+//                .id(roleId)
+//                .deleted(0)
+//                .updateTime(new Date())
+//                .build();
+//        //修改状态
+//        int row = sysRoleMapper.updateByPrimaryKeySelective(sysRole);
+//
+//        if (row != 1){
+//            throw new BusinessException(ResponseCode.ERROR.getMessage());
+//        }
+//        return R.ok(ResponseCode.SUCCESS.getMessage());
         //组装数据
-        SysRole sysRole = SysRole.builder()
-                .id(roleId)
-                .deleted(0)
-                .updateTime(new Date())
-                .build();
+        SysRole role = SysRole.builder().id(roleId).status(status).updateTime(new Date()).build();
         //修改状态
-        int row = sysRoleMapper.updateByPrimaryKeySelective(sysRole);
+        int row = sysRoleMapper.updateByPrimaryKeySelective(role);
 
         if (row != 1){
             throw new BusinessException(ResponseCode.ERROR.getMessage());

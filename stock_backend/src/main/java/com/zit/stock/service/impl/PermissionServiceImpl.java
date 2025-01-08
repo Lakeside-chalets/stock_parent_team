@@ -185,7 +185,7 @@ public class PermissionServiceImpl implements PermissionService {
         SysPermission permission = new SysPermission();
         BeanUtils.copyProperties(vo,permission);
         this.checkPermissionForm(permission);
-        //TODO 如果再更新时，父级已被修改，则排除异常
+        //TODO 如果再更新时，父级已被修改，则抛出异常
         permission.setStatus(1);
         permission.setUpdateTime(new Date());
         permission.setDeleted(1);
