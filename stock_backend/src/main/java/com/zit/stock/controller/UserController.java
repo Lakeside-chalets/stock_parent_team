@@ -26,7 +26,7 @@ import java.util.Map;
  * @Date: 2024/8/27 14:26
  */
 
-@Api(value = "/api", tags = {"}"})
+@Api(value = "/api", tags = {": 用户管理相关接口控制器"})
 @RestController// 定义一个restful风格的接口 是@Controller+@ResponseBody的结合体
 @RequestMapping("/api")
 public class UserController {
