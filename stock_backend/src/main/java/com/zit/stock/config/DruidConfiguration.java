@@ -43,7 +43,7 @@ public class DruidConfiguration {
         //servletRegistrationBean.addInitParameter("deny","192.168.1.73");
         //登录查看信息的账号密码.
         servletRegistrationBean.addInitParameter("loginUsername","admin");
-        servletRegistrationBean.addInitParameter("loginPassword","1234");
+        servletRegistrationBean.addInitParameter("loginPassword","123456");
         //是否能够重置数据.
         servletRegistrationBean.addInitParameter("resetEnable","false");
         return servletRegistrationBean;
