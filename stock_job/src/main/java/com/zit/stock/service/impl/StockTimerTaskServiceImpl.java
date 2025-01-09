@@ -259,17 +259,19 @@ public class StockTimerTaskServiceImpl implements StockTimerTaskService {
         log.info("板块数据量：{}", infos.size());
         //数据分片保存到数据库下 行业板块类目大概50个，可每小时查询一 次即可
         Lists.partition(infos, 20).forEach(list -> {
-            //20个一组，批量插入
-            int count = stockBlockRtInfoMapper.insertBatch(list);
-            if (count>0) {
-                //板块采集完毕后，通知backend工程刷新缓存
-                //发送日期对象，接收方通过接收的日期与当前日期对比，能判断出数据延迟的时常问题
-                rabbitTemplate.convertAndSend("stockExchange", "Stock.Block", new Date());
-                log.info("当前时间点:{},插入板块数据:{}成功", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), list);
-            } else {
-                log.info("当前时间点:{},插入板块数据:{}失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), list);
-            }
+            threadPoolTaskExecutor.execute(() -> {
+                //20个一组，批量插入
+                int count = stockBlockRtInfoMapper.insertBatch(list);
+                if (count > 0) {
+                    //板块采集完毕后，通知backend工程刷新缓存
+                    //发送日期对象，接收方通过接收的日期与当前日期对比，能判断出数据延迟的时常问题
+                    rabbitTemplate.convertAndSend("stockExchange", "Stock.Block", new Date());
+                    log.info("当前时间点:{},插入板块数据:{}成功", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), list);
+                } else {
+                    log.info("当前时间点:{},插入板块数据:{}失败", DateTime.now().toString("yyyy-MM-dd HH:mm:ss"), list);
+                }
 
+            });
         });
     }
 
